@@ -58,14 +58,14 @@ class MapSampleState extends State<MapsScreen> {
       });
     }
   }
-
   void getCurrentLocation()async{
     Location location = Location();
     location.getLocation().then((value){
-       currentLocation = value;
-    setState(() {
+      currentLocation = value;
+       setState(() {
 
     });
+
     });
 
     GoogleMapController controllerg = await _controller.future;
@@ -128,8 +128,11 @@ class MapSampleState extends State<MapsScreen> {
   Widget build(BuildContext context) {
     return currentLocation == null? Center(child: Text("Loading..."),) :GoogleMap(
       mapType: MapType.normal,
-      initialCameraPosition: CameraPosition(target: LatLng(currentLocation!.latitude!,currentLocation!.longitude!), zoom: 16),
+      initialCameraPosition:
+      CameraPosition(target:
+      LatLng(currentLocation!.latitude!,currentLocation!.longitude!), zoom: 16),
       polylines: {
+
         Polyline(polylineId: PolylineId("route"), points: polyCord),
       },
       markers: {

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:guidanclyflutter/screens/Auth/SignIn.dart';
+import 'package:guidanclyflutter/screens/Auth/signInWithNumber.dart';
 import 'package:guidanclyflutter/screens/onboard/welcome.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -100,8 +101,7 @@ class _Onboard3State extends State<Onboard3> {
               InkWell(
                 borderRadius: BorderRadius.circular(50),
                 onTap: () {
-                  Navigator.pushReplacement(context,PageTransition(child:SignIn(), type: PageTransitionType.scale,alignment: Alignment.bottomCenter,childCurrent: Welcome(),duration: Duration(milliseconds: 600),curve: Curves.easeIn));
-
+                  Navigator.pushReplacement(context,PageTransition(child:SignWithNumber(), type: PageTransitionType.scale,alignment: Alignment.bottomCenter,childCurrent: Welcome(),duration: Duration(milliseconds: 600),curve: Curves.easeIn));
                 },
                 child: Container(
                   alignment: Alignment.center,
