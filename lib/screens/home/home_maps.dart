@@ -11,7 +11,7 @@ class HomeMaps extends StatefulWidget {
 
 class _HomeMapsState extends State<HomeMaps> {
   final DraggableScrollableController _sheetController = DraggableScrollableController();
-
+    bool isSheetBottom=false;
   @override
   void initState() {
     super.initState();
@@ -19,7 +19,14 @@ class _HomeMapsState extends State<HomeMaps> {
 
   void _moveSheetToBottom() {
     _sheetController.animateTo(0.1, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+    isSheetBottom=true;
   }
+  void _moveSheetToTop() {
+    _sheetController.animateTo(0.4, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+    isSheetBottom=false;
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +129,7 @@ class _HomeMapsState extends State<HomeMaps> {
                         borderRadius: BorderRadius.circular(50),
                       ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                      hintText: "Search in Google Maps",
+                      hintText: "Search in Guidancly Maps",
                       hintStyle: TextStyle(color: Colors.grey),
                     ),
                   ),
@@ -134,107 +141,140 @@ class _HomeMapsState extends State<HomeMaps> {
             child: DraggableScrollableSheet(
               controller: _sheetController,
               initialChildSize: 0.4,
-              minChildSize: 0.1,
+              minChildSize: 0.12,
               maxChildSize: 0.4,
               builder: (context, scrollController) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
+                return GestureDetector(
+                  onTap: (){
+                    if(!isSheetBottom) {
+                      _moveSheetToBottom();
+                    }else{
+                      _moveSheetToTop();
+                    }
+                  },
+                  child: Container(
+
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10.0,
+                          spreadRadius: 5.0,
+                        )
+                      ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 10.0,
-                        spreadRadius: 5.0,
-                      )
-                    ],
-                  ),
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[400],
-                                borderRadius: BorderRadius.circular(2),
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Container(
+                                width: 40,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[400],
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
                               ),
                             ),
-                          ),
 
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Find a Tour",
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                SizedBox(height: 16),
-                                TextField(
-                                  decoration: InputDecoration(
-                                    hintText: "Where do you want to go?",
-                                    prefixIcon: Icon(Icons.location_on, color: Colors.grey),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(50),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                                  ),
-                                ),
-                                SizedBox(height: 16),
-                                TextField(
-                                  decoration: InputDecoration(
-                                    hintText: "Offer your fare",
-                                    prefixIcon: Icon(Icons.attach_money, color: Colors.grey),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(50),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                                  ),
-                                ),
-                                SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    // Handle tour search
-                                  },
-                                  child: Text('Find a Tour',style: TextStyle(color: Colors.white),),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: mainColor,
-                                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Find a Tour",
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
+                                  SizedBox(height: 16),
+                                  TextField(
+                                    decoration: InputDecoration(
+                                      hintText: "Where do you want to go?",
+                                      prefixIcon: Icon(Icons.location_on, color: Colors.grey),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(50),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 20),
+                                    ),
+                                  ),
+                                  SizedBox(height: 16),
+                                  TextField(
+                                    decoration: InputDecoration(
+                                      hintText: "Offer your fare",
+                                      prefixIcon: Icon(Icons.attach_money, color: Colors.grey),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(50),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 20),
+                                    ),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          // Handle tour search
+                                        },
+                                        child: Text('Find a Tour',style: TextStyle(color: Colors.white),),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: mainColor,
 
-                          // Add more tour details or any other widgets here
-                        ],
+                                          padding: EdgeInsets.symmetric(horizontal: 90, vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          // Handle tour search
+                                        },
+                                        child: Icon(Icons.settings_outlined,color: Colors.white,size: 20,),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: mainColor,
+
+                                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+
+                            // Add more tour details or any other widgets here
+                          ],
+                        ),
                       ),
                     ),
                   ),
