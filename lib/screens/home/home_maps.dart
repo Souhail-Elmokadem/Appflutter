@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
 import 'package:guidanclyflutter/screens/widgets/maps_screen.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 
@@ -34,14 +35,43 @@ class _HomeMapsState extends State<HomeMaps> {
       drawer: Drawer(
         child: Column(
           children: <Widget>[
+            Container(
+              margin: EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                    child: CircleAvatar(
+                      radius: 25,
+                      backgroundImage: NetworkImage(
+                        'https://gale-s3-bucket.s3.eu-central-1.amazonaws.com/854ac909-1404-4785-bb63-4a8917e9edb7.jpeg',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 60, 0),
+                    child: Text(
+                      "Med l7way",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  Icon(Icons.keyboard_arrow_right_sharp)
+                ],
+              ),
+            ),
             ListView(
               padding: EdgeInsets.only(top: 30),
               shrinkWrap: true,
               children: <Widget>[
                 ListTile(
-                  leading: Icon(Icons.person_pin),
-                  title: Text('Profile'),
-                  onTap: () {},
+                      leading: Icon(Icons.person_pin),
+                      title: Text('Profile'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ProfileScreen()),
+                        );
+                      },
                 ),
                 Divider(height: 1, color: Colors.black12),
                 ListTile(
