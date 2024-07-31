@@ -7,24 +7,26 @@ import 'package:guidanclyflutter/shared/constants/constants.dart';
 import 'package:location/location.dart';
 
 class MapsScreen extends StatefulWidget {
-  final VoidCallback onMapTap;
-  const MapsScreen({required this.onMapTap, super.key});
+  final Function() onMapTap;
+  final Function() onMoveToCurrentLocation;
+  final Completer<GoogleMapController> controller; // Accept the controller here
 
+  MapsScreen({
+    required this.onMapTap,
+    required this.onMoveToCurrentLocation,
+    required this.controller, // Accept the controller here
+  });
   @override
   State<MapsScreen> createState() => MapSampleState();
 }
 
 class MapSampleState extends State<MapsScreen> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
-
-  StreamSubscription<Position>? streamPos;
   List<Marker> markers = [];
   CameraPosition? cameraPosition;
   LatLng defaultLocation = const LatLng(33.56471147828006, -7.622704915702343);
   LatLng defaultLocation1 = const LatLng(33.5694, -7.6233);
   bool locationFetched = false;
   List<LatLng> polyCord = [];
-
   LocationData? currentLocation;
 
   @override
@@ -35,6 +37,7 @@ class MapSampleState extends State<MapsScreen> {
   }
 
   Future<void> getCurrentPosition() async {
+    print("Fetching current position...");
     bool isGeoEnable = await Geolocator.isLocationServiceEnabled();
     if (!isGeoEnable) return;
 
@@ -60,24 +63,35 @@ class MapSampleState extends State<MapsScreen> {
     }
   }
 
+  Future<void> moveToCurrentLocation() async {
+    print("Move to current location called");
+    final controller = await widget.controller.future; // Use the controller from widget
+    if (currentLocation != null) {
+      final cameraUpdate = CameraUpdate.newLatLng(
+        LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+      );
+      controller.animateCamera(cameraUpdate);
+    } else {
+      print("Current location is null");
+    }
+  }
+
   void getCurrentLocation() async {
     Location location = Location();
-    location.getLocation().then((value) {
-      currentLocation = value;
-      setState(() {});
+    location.getLocation().then((value) async {
+      setState(() {
+        currentLocation = value;
+      });
+      print("Current location updated: $currentLocation");
+      GoogleMapController controller = await widget.controller.future; // Use the controller from widget
+      if (currentLocation != null) {
+        controller.animateCamera(CameraUpdate.newLatLng(
+          LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+        ));
+      }
     });
 
-    GoogleMapController controllerg = await _controller.future;
-    location.onLocationChanged.listen((newloc) {
-      currentLocation = newloc;
-      print("+++++++++++++++++++++");
-      controllerg.animateCamera(
-          CameraUpdate.newCameraPosition(
-              CameraPosition(
-                  zoom: 16,
-                  target: LatLng(newloc.latitude!, newloc.longitude!))));
-      setState(() {});
-    });
+    print("Location fetching completed");
   }
 
   Future<void> distancePolyline() async {
@@ -94,7 +108,7 @@ class MapSampleState extends State<MapsScreen> {
 
       if (polylineResult.points.isNotEmpty) {
         polylineResult.points.forEach((PointLatLng p) => polyCord.add(LatLng(p.latitude, p.longitude)));
-        setState(() {}); // Refresh the UI
+        setState(() {});
       } else {
         print("No points found in the polyline result.");
       }
@@ -103,38 +117,27 @@ class MapSampleState extends State<MapsScreen> {
     }
   }
 
-  void printDistanceBetweenMarkers() {
-    // double distanceInMeters = Geolocator.distanceBetween(
-    //   defaultLocation1.latitude,
-    //   defaultLocation1.longitude,
-    //   defaultLocation.latitude
-    // );
-    // print("Distance between markers: $distanceInMeters meters");
-  }
-
-  @override
-  void dispose() {
-    streamPos?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return currentLocation == null
         ? Center(child: Text("Loading..."))
         : GoogleMap(
       mapType: MapType.normal,
-      initialCameraPosition:
-      CameraPosition(target: LatLng(currentLocation!.latitude!, currentLocation!.longitude!), zoom: 16),
+      initialCameraPosition: CameraPosition(
+        target: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+        zoom: 16,
+      ),
       polylines: {
         Polyline(polylineId: PolylineId("route"), points: polyCord),
       },
       markers: {
-        Marker(markerId: MarkerId("current"), position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!)),
+        Marker(
+            markerId: MarkerId("current"),
+            position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!)),
         Marker(markerId: MarkerId("dst"), position: LatLng(defaultLocation.latitude, defaultLocation.longitude)),
       },
       onMapCreated: (GoogleMapController controller) {
-        _controller.complete(controller);
+        widget.controller.complete(controller); // Complete the controller from widget
         if (cameraPosition != null) {
           controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition!));
         }
@@ -142,7 +145,6 @@ class MapSampleState extends State<MapsScreen> {
       onTap: (LatLng position) {
         widget.onMapTap();
       },
-
     );
   }
 }

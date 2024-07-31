@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:guidanclyflutter/screens/widgets/maps_screen.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
+import 'package:location/location.dart';
 
 class HomeMaps extends StatefulWidget {
   const HomeMaps({super.key});
@@ -11,7 +14,10 @@ class HomeMaps extends StatefulWidget {
 
 class _HomeMapsState extends State<HomeMaps> {
   final DraggableScrollableController _sheetController = DraggableScrollableController();
-    bool isSheetBottom=false;
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  bool isSheetBottom = false;
+  LocationData? currentLocation;
+
   @override
   void initState() {
     super.initState();
@@ -19,14 +25,38 @@ class _HomeMapsState extends State<HomeMaps> {
 
   void _moveSheetToBottom() {
     _sheetController.animateTo(0.1, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-    isSheetBottom=true;
+    setState(() {
+      isSheetBottom = true;
+    });
   }
+
   void _moveSheetToTop() {
     _sheetController.animateTo(0.4, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-    isSheetBottom=false;
+    setState(() {
+      isSheetBottom = false;
+    });
   }
 
-
+  Future<void> _handleMoveToCurrentLocation() async {
+    Location location = Location();
+    try {
+      LocationData locationData = await location.getLocation();
+      setState(() {
+        currentLocation = locationData;
+      });
+      print("Current location updated: $currentLocation");
+      if (_controller.isCompleted) {
+        final GoogleMapController controller = await _controller.future;
+        controller.animateCamera(CameraUpdate.newLatLng(
+          LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+        ));
+        print("Camera moved to: ${currentLocation!.latitude!}, ${currentLocation!.longitude!}");
+      }
+    } catch (e) {
+      print("Error fetching location: $e");
+    }
+    print("Location fetching completed");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +95,11 @@ class _HomeMapsState extends State<HomeMaps> {
           Positioned.fill(
             child: GestureDetector(
               onTap: _moveSheetToBottom,
-              child: MapsScreen(onMapTap: _moveSheetToBottom),
+              child: MapsScreen(
+                onMapTap: _moveSheetToBottom,
+                onMoveToCurrentLocation: _handleMoveToCurrentLocation,
+                controller: _controller,
+              ),
             ),
           ),
           Positioned(
@@ -137,6 +171,37 @@ class _HomeMapsState extends State<HomeMaps> {
               ),
             ),
           ),
+          Positioned(
+            bottom: 120,
+            right: 16,
+            child: Builder(
+              builder: (context) => Padding(
+                padding: const EdgeInsets.all(0),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      _handleMoveToCurrentLocation();
+                    },
+                    icon: Icon(Icons.near_me_rounded, color: mainColor),
+                  ),
+                ),
+              ),
+            ),
+          ),
           DraggableScrollableActuator(
             child: DraggableScrollableSheet(
               controller: _sheetController,
@@ -145,15 +210,14 @@ class _HomeMapsState extends State<HomeMaps> {
               maxChildSize: 0.4,
               builder: (context, scrollController) {
                 return GestureDetector(
-                  onTap: (){
-                    if(!isSheetBottom) {
+                  onTap: () {
+                    if (!isSheetBottom) {
                       _moveSheetToBottom();
-                    }else{
+                    } else {
                       _moveSheetToTop();
                     }
                   },
                   child: Container(
-
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.only(
@@ -185,7 +249,6 @@ class _HomeMapsState extends State<HomeMaps> {
                                 ),
                               ),
                             ),
-
                             Container(
                               padding: EdgeInsets.all(16),
                               decoration: BoxDecoration(
@@ -239,40 +302,13 @@ class _HomeMapsState extends State<HomeMaps> {
                                         onPressed: () {
                                           // Handle tour search
                                         },
-                                        child: Text('Find a Tour',style: TextStyle(color: Colors.white),),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: mainColor,
-
-                                          padding: EdgeInsets.symmetric(horizontal: 90, vertical: 16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 5,
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          // Handle tour search
-                                        },
-                                        child: Icon(Icons.settings_outlined,color: Colors.white,size: 20,),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: mainColor,
-
-                                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                        ),
+                                        child: Text("Search"),
                                       ),
                                     ],
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
-
-                            // Add more tour details or any other widgets here
                           ],
                         ),
                       ),
@@ -280,27 +316,6 @@ class _HomeMapsState extends State<HomeMaps> {
                   ),
                 );
               },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.blueAccent),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
             ),
           ),
         ],
