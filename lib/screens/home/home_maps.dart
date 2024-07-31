@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:guidanclyflutter/screens/widgets/maps_screen.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
@@ -29,9 +30,9 @@ class _HomeMapsState extends State<HomeMaps> {
       isSheetBottom = true;
     });
   }
-
   void _moveSheetToTop() {
     _sheetController.animateTo(0.4, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+
     setState(() {
       isSheetBottom = false;
     });
@@ -64,14 +65,43 @@ class _HomeMapsState extends State<HomeMaps> {
       drawer: Drawer(
         child: Column(
           children: <Widget>[
+            Container(
+              margin: EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                    child: CircleAvatar(
+                      radius: 25,
+                      backgroundImage: NetworkImage(
+                        'https://gale-s3-bucket.s3.eu-central-1.amazonaws.com/854ac909-1404-4785-bb63-4a8917e9edb7.jpeg',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 60, 0),
+                    child: Text(
+                      "Med l7way",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  Icon(Icons.keyboard_arrow_right_sharp)
+                ],
+              ),
+            ),
             ListView(
               padding: EdgeInsets.only(top: 30),
               shrinkWrap: true,
               children: <Widget>[
                 ListTile(
-                  leading: Icon(Icons.person_pin),
-                  title: Text('Profile'),
-                  onTap: () {},
+                      leading: Icon(Icons.person_pin),
+                      title: Text('Profile'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ProfileScreen()),
+                        );
+                      },
                 ),
                 Divider(height: 1, color: Colors.black12),
                 ListTile(
@@ -171,37 +201,6 @@ class _HomeMapsState extends State<HomeMaps> {
               ),
             ),
           ),
-          Positioned(
-            bottom: 120,
-            right: 16,
-            child: Builder(
-              builder: (context) => Padding(
-                padding: const EdgeInsets.all(0),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 7,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      _handleMoveToCurrentLocation();
-                    },
-                    icon: Icon(Icons.near_me_rounded, color: mainColor),
-                  ),
-                ),
-              ),
-            ),
-          ),
           DraggableScrollableActuator(
             child: DraggableScrollableSheet(
               controller: _sheetController,
@@ -218,6 +217,7 @@ class _HomeMapsState extends State<HomeMaps> {
                     }
                   },
                   child: Container(
+
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.only(
@@ -302,13 +302,40 @@ class _HomeMapsState extends State<HomeMaps> {
                                         onPressed: () {
                                           // Handle tour search
                                         },
-                                        child: Text("Search"),
+                                        child: Text('Find a Tour',style: TextStyle(color: Colors.white),),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: mainColor,
+
+                                          padding: EdgeInsets.symmetric(horizontal: 90, vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          // Handle tour search
+                                        },
+                                        child: Icon(Icons.settings_outlined,color: Colors.white,size: 20,),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: mainColor,
+
+                                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
                                       ),
                                     ],
-                                  ),
+                                  )
                                 ],
                               ),
                             ),
+
+                            // Add more tour details or any other widgets here
                           ],
                         ),
                       ),
@@ -316,6 +343,27 @@ class _HomeMapsState extends State<HomeMaps> {
                   ),
                 );
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.blueAccent),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+              ),
             ),
           ),
         ],
