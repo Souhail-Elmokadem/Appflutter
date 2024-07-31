@@ -7,7 +7,8 @@ import 'package:guidanclyflutter/shared/constants/constants.dart';
 import 'package:location/location.dart';
 
 class MapsScreen extends StatefulWidget {
-  const MapsScreen({super.key});
+  final VoidCallback onMapTap;
+  const MapsScreen({required this.onMapTap, super.key});
 
   @override
   State<MapsScreen> createState() => MapSampleState();
@@ -58,32 +59,27 @@ class MapSampleState extends State<MapsScreen> {
       });
     }
   }
-  void getCurrentLocation()async{
+
+  void getCurrentLocation() async {
     Location location = Location();
-    location.getLocation().then((value){
+    location.getLocation().then((value) {
       currentLocation = value;
-       setState(() {
-
-    });
-
+      setState(() {});
     });
 
     GoogleMapController controllerg = await _controller.future;
-    location.onLocationChanged.listen((newloc){
-      currentLocation=newloc;
+    location.onLocationChanged.listen((newloc) {
+      currentLocation = newloc;
       print("+++++++++++++++++++++");
       controllerg.animateCamera(
           CameraUpdate.newCameraPosition(
               CameraPosition(
-                zoom: 16,
-                  target: LatLng(newloc.latitude!,newloc.longitude!))));
-      setState(() {
-
-      });
+                  zoom: 16,
+                  target: LatLng(newloc.latitude!, newloc.longitude!))));
+      setState(() {});
     });
-
-
   }
+
   Future<void> distancePolyline() async {
     try {
       PolylinePoints polylinePoints = PolylinePoints();
@@ -108,15 +104,13 @@ class MapSampleState extends State<MapsScreen> {
   }
 
   void printDistanceBetweenMarkers() {
-    double distanceInMeters = Geolocator.distanceBetween(
-      defaultLocation1.latitude,
-      defaultLocation1.longitude,
-      defaultLocation.latitude,
-      defaultLocation.longitude,
-    );
-    print("Distance between markers: $distanceInMeters meters");
+    // double distanceInMeters = Geolocator.distanceBetween(
+    //   defaultLocation1.latitude,
+    //   defaultLocation1.longitude,
+    //   defaultLocation.latitude
+    // );
+    // print("Distance between markers: $distanceInMeters meters");
   }
-
 
   @override
   void dispose() {
@@ -126,13 +120,13 @@ class MapSampleState extends State<MapsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return currentLocation == null? Center(child: Text("Loading..."),) :GoogleMap(
+    return currentLocation == null
+        ? Center(child: Text("Loading..."))
+        : GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition:
-      CameraPosition(target:
-      LatLng(currentLocation!.latitude!,currentLocation!.longitude!), zoom: 16),
+      CameraPosition(target: LatLng(currentLocation!.latitude!, currentLocation!.longitude!), zoom: 16),
       polylines: {
-
         Polyline(polylineId: PolylineId("route"), points: polyCord),
       },
       markers: {
@@ -145,6 +139,10 @@ class MapSampleState extends State<MapsScreen> {
           controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition!));
         }
       },
+      onTap: (LatLng position) {
+        widget.onMapTap();
+      },
+
     );
   }
 }
