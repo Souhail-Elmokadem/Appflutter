@@ -1,7 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
 import 'package:guidanclyflutter/screens/widgets/maps_screen.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:location/location.dart';
@@ -201,6 +202,37 @@ class _HomeMapsState extends State<HomeMaps> {
               ),
             ),
           ),
+          Positioned(
+            bottom: 120,
+            right: 16,
+            child: Builder(
+              builder: (context) => Padding(
+                padding: const EdgeInsets.all(0),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      _handleMoveToCurrentLocation();
+                    },
+                    icon: Icon(Icons.near_me_rounded, color: mainColor),
+                  ),
+                ),
+              ),
+            ),
+          ),
           DraggableScrollableActuator(
             child: DraggableScrollableSheet(
               controller: _sheetController,
@@ -209,10 +241,10 @@ class _HomeMapsState extends State<HomeMaps> {
               maxChildSize: 0.4,
               builder: (context, scrollController) {
                 return GestureDetector(
-                  onTap: () {
-                    if (!isSheetBottom) {
+                  onTap: (){
+                    if(!isSheetBottom) {
                       _moveSheetToBottom();
-                    } else {
+                    }else{
                       _moveSheetToTop();
                     }
                   },
@@ -249,6 +281,7 @@ class _HomeMapsState extends State<HomeMaps> {
                                 ),
                               ),
                             ),
+
                             Container(
                               padding: EdgeInsets.all(16),
                               decoration: BoxDecoration(
