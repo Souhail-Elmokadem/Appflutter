@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:guidanclyflutter/screens/guide/create_tour.dart';
+import 'package:guidanclyflutter/shared/constants/colors.dart';
+import 'package:location/location.dart';
+import 'package:provider/provider.dart';
+import 'create_tour.dart';
 
 class CreateTourPage extends StatefulWidget {
   @override
@@ -8,82 +13,260 @@ class CreateTourPage extends StatefulWidget {
 }
 
 class _CreateTourPageState extends State<CreateTourPage> {
-  final CreateTour createTour = CreateTour();
   TextEditingController _tourNameController = TextEditingController();
+  final FocusNode _tourfocus = FocusNode();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final CreateTour createTour = CreateTour();
+
+  LocationData? currentLocation;
+  Future<void> _handleMoveToCurrentLocation() async {
+    Location location = Location();
+    try {
+      LocationData locationData = await location.getLocation();
+      setState(() {
+        currentLocation = locationData;
+      });
+      print("Current location updated: $currentLocation");
+      if (_controller.isCompleted) {
+        final GoogleMapController controller = await _controller.future;
+        controller.animateCamera(CameraUpdate.newLatLng(
+          LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+        ));
+        print("Camera moved to: ${currentLocation!.latitude!}, ${currentLocation!.longitude!}");
+      }
+    } catch (e) {
+      print("Error fetching location: $e");
+    }
+    print("Location fetching completed");
+  }
+  bool _isTourFocus = false;
 
   @override
   void initState() {
     super.initState();
-    createTour.initializeCurrentLocation().then((_) {
-      setState(() {});
+    Provider.of<CreateTour>(context, listen: false).initializeCurrentLocation();
+    _tourfocus.addListener(() {
+      setState(() {
+        _isTourFocus = _tourfocus.hasFocus;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset:
+          false, // Prevents resizing when the keyboard appears
       appBar: AppBar(
-        title: Text("Create a Tour"),
+        title: const Text("Creation of tour",style: TextStyle(color: Colors.blue,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
+        backgroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: () {
-              // Save tour logic
-            },
-          ),
-        ],
-      ),
-      body: createTour.currentLocation == null
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _tourNameController,
-              decoration: InputDecoration(
-                labelText: 'Tour Name',
-                border: OutlineInputBorder(),
+            padding: const EdgeInsets.only(right: 10),
+            child: ElevatedButton(
+              onPressed: () async {
+               //
+              },
+              child: Text('Save'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
+                elevation: 0,
+
+
+                textStyle: TextStyle(fontSize: 16),
               ),
             ),
           ),
-          Expanded(
-            child: Stack(
-              children: [
-                GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(createTour.currentLocation!.latitude!, createTour.currentLocation!.longitude!),
-                    zoom: 14,
-                  ),
-                  onMapCreated: (controller) {
-                    createTour.mapController.complete(controller);
-                  },
-                  onTap: (position) {
-                    setState(() {
-                      createTour.addWaypoint(position);
-                    });
-                  },
-                  markers: createTour.getWaypoints()
-                      .map((point) => Marker(markerId: MarkerId(point.toString()), position: point))
-                      .toSet(),
-                  polylines: createTour.getPolylines().toSet(),
-                ),
-                Positioned(
-                  bottom: 16,
-                  left: 16,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await createTour.generateRoute();
-                      setState(() {});
-                    },
-                    child: Text('Generate Route'),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
+      body: Consumer<CreateTour>(
+        builder: (context, createTour, child) {
+          if (createTour.currentLocation == null) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: TextField(
+                          controller: _tourNameController,
+                          focusNode: _tourfocus,
+                          decoration: InputDecoration(
+                            suffixIcon: Icon(
+                              Icons.route_outlined,
+                              color: mainColor,
+                            ),
+                            hintText: "tour name",
+                            filled: true,
+                            fillColor: _isTourFocus
+                                ? const Color(0xffEBEBFF)
+                                : const Color(0xfff7f7f9),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(17),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(17),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 15, horizontal: 20),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          GoogleMap(
+                            zoomControlsEnabled: false,  // Disable zoom controls
+
+
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                  createTour.currentLocation!.latitude!,
+                                  createTour.currentLocation!.longitude!),
+                              zoom: 14,
+                            ),
+                            onMapCreated: (controller) {
+                              _controller.complete(controller);
+                              createTour.mapController.complete(controller);
+                            },
+                            onTap: (position) async {
+                              String? title =
+                                  await _promptForMarkerTitle(context);
+                              if (title != null) {
+                                await createTour.addWaypoint(position, title);
+                                createTour.notifyListeners();
+                              }
+                            },
+                            markers: createTour.getWaypoints().toSet(),
+                            polylines: createTour.getPolylines(),
+                          ),
+                          Positioned(
+                            bottom: 16,
+                            left: 16,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                await createTour.generateRoute();
+                              },
+                              child: Text('Generate Route'),
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.blue,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                textStyle: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 16,
+                            right: 16,
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.4),
+                                    spreadRadius: 1,
+                                    blurRadius: 7,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                onPressed: () {
+                                  createTour.clearMarkersAndPolylines();
+                                },
+                                icon: Icon(Icons.clear, color: mainColor),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: Builder(
+                              builder: (context) => Padding(
+                                padding: const EdgeInsets.all(0),
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(50),
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.4),
+                                        spreadRadius: 1,
+                                        blurRadius: 7,
+                                        offset: Offset(0, 0),
+                                      ),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () {
+                                     _handleMoveToCurrentLocation();
+                                    },
+                                    icon: Icon(Icons.near_me_rounded, color: mainColor),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+          }
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _tourfocus.dispose();
+  }
+
+  Future<String?> _promptForMarkerTitle(BuildContext context) async {
+    TextEditingController titleController = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter Marker Title'),
+          content: TextField(
+            controller: titleController,
+            decoration: InputDecoration(hintText: 'Marker Title'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(null);
+              },
+            ),
+            TextButton(
+              child: Text('Add'),
+              onPressed: () {
+                Navigator.of(context).pop(titleController.text);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

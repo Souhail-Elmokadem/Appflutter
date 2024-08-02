@@ -4,11 +4,13 @@ import 'package:guidanclyflutter/cubit/Auth/auth_cubit.dart';
 import 'package:guidanclyflutter/cubit/layout/layout_cubit.dart';
 import 'package:guidanclyflutter/screens/Auth/SignIn.dart';
 import 'package:guidanclyflutter/screens/Auth/signup.dart';
+import 'package:guidanclyflutter/screens/guide/create_tour.dart';
 import 'package:guidanclyflutter/screens/onboard/welcome.dart';
 import 'package:guidanclyflutter/screens/splash/splash_screen.dart';
 import 'package:guidanclyflutter/shared/constants/constants.dart';
 import 'package:guidanclyflutter/shared/shared_preferences/sharedNatwork.dart';
 import 'package:guidanclyflutter/shared/theme/theme.dart';
+import 'package:provider/provider.dart';
 
 void main()async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +34,9 @@ class _GuidanclyState extends State<Guidancly> {
       providers: [
         BlocProvider(create: (context)=> Authcubit()),
         BlocProvider(create: (context) => LayoutCubit()..getUserData()),
+        ChangeNotifierProvider<CreateTour>(
+          create: (_) => CreateTour(),
+        ),
       ],
       child: MaterialApp(
         theme: appTheme,

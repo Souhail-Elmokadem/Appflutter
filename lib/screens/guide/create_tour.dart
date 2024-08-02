@@ -1,76 +1,152 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:guidanclyflutter/shared/constants/constants.dart';
+import 'package:http/http.dart' as http;
 
-class CreateTour {
-  List<LatLng> waypoints = [];
-  List<Polyline> polylines = [];
-  Completer<GoogleMapController> mapController = Completer();
+class CreateTour extends ChangeNotifier {
+  final Completer<GoogleMapController> mapController = Completer();
   LocationData? currentLocation;
+  List<LatLng> waypoints = [];
+  Set<Marker> markers = {};
+  List<LatLng> polylineCoordinates = [];
+  Set<Polyline> polylines = {};
+  final String orsApiKey = '5b3ce3597851110001cf62486287ac99583d441baa536d57a8d1a6b4'; // Replace with your ORS API key
 
-  // Constructor
-  CreateTour();
-
-  // Add a waypoint
-  void addWaypoint(LatLng point) {
-    waypoints.add(point);
+  CreateTour() {
+    initializeCurrentLocation();
   }
 
-  // Generate route using waypoints
-  Future<void> generateRoute() async {
-    if (waypoints.length < 2) {
-      print('Select at least 2 waypoints');
-      return;
-    }
-
-    PolylinePoints polylinePoints = PolylinePoints();
-    List<LatLng> polylineCoordinates = [];
-
-    for (int i = 0; i < waypoints.length - 1; i++) {
-      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-
-
-        googleApiKey: apiMapsKey,
-        request: PolylineRequest(origin: PointLatLng(waypoints[i].latitude, waypoints[i].longitude), destination: PointLatLng(waypoints[i + 1].latitude, waypoints[i + 1].longitude), mode: TravelMode.driving)
-      );
-
-      if (result.points.isNotEmpty) {
-        result.points.forEach((PointLatLng point) {
-          polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-        });
-      }
-    }
-
-    polylines.add(Polyline(
-      polylineId: PolylineId('route'),
-      points: polylineCoordinates,
-      color: Colors.blue,
-      width: 5,
-    ));
-  }
-
-  // Initialize the current location
-  Future<void> initializeCurrentLocation() async {
+  void initializeCurrentLocation() async {
     Location location = Location();
     currentLocation = await location.getLocation();
+    notifyListeners();
   }
 
-  // Move camera to a specific location
-  Future<void> moveCamera(LatLng location) async {
-    final GoogleMapController controller = await mapController.future;
-    controller.animateCamera(CameraUpdate.newLatLng(location));
+  Future<void> addWaypoint(LatLng point, String title) async {
+    waypoints.add(point);
+
+    // Create a custom marker with the title
+    final markerIcon = await createCustomMarker(title);
+
+    // Add the marker to the set of markers
+    markers.add(
+      Marker(
+        markerId: MarkerId(point.toString()),
+        position: point,
+        icon: markerIcon,
+        infoWindow: InfoWindow(
+          title: title,
+        ),
+      ),
+    );
+
+    notifyListeners();
+  }
+  Future<void> clearMarkersAndPolylines() async {
+    waypoints.clear();
+    markers.clear();
+    polylineCoordinates.clear();
+    polylines.clear();
+    notifyListeners();
   }
 
-  // Get the list of waypoints
-  List<LatLng> getWaypoints() {
-    return waypoints;
+  Future<BitmapDescriptor> createCustomMarker(String title) async {
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+
+    // Adjust these sizes based on your image dimensions and text requirements
+    const double imageSize = 120.0; // Size of the marker image
+    const double padding = 20.0; // Padding around the text
+    const double spacing = 20.0; // Space between text and marker image
+
+    // Calculate the width based on the text length
+    final double textWidth = title.length * 40.0+60;
+    const double textHeight =0.0; // Height of the text box
+
+
+    // Load the marker image from the assets
+    final ByteData data = await rootBundle.load('assets/img/marker.png');
+    final Uint8List markerBytes = data.buffer.asUint8List();
+    final ui.Codec codec = await ui.instantiateImageCodec(markerBytes, targetWidth: imageSize.toInt(), targetHeight: imageSize.toInt());
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+    final ui.Image markerImage = frameInfo.image;
+
+    // Draw the marker image below the text with spacing
+    canvas.drawImage(markerImage, Offset((textWidth / 2) - (imageSize / 2), textHeight + spacing), Paint());
+
+    // Combine the text and image into one bitmap
+    final ui.Picture picture = pictureRecorder.endRecording();
+    final ui.Image combinedImage = await picture.toImage(textWidth.toInt(), (imageSize + textHeight + spacing).toInt());
+    final ByteData? byteData = await combinedImage.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List combinedImageBytes = byteData!.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(combinedImageBytes);
   }
 
-  // Get the list of polylines
-  List<Polyline> getPolylines() {
+
+
+  Set<Marker> getWaypoints() {
+    return markers;
+  }
+
+  Set<Polyline> getPolylines() {
     return polylines;
+  }
+
+  Future<void> generateRoute() async {
+    if (waypoints.isEmpty) return;
+
+    polylineCoordinates.clear();
+    polylines.clear();
+
+    List<List<double>> coordinates = waypoints
+        .map((point) => [point.longitude, point.latitude])
+        .toList();
+
+    var body = json.encode({
+      'coordinates': coordinates,
+      'format': 'geojson',
+      'profile': 'foot-walking',
+      'units': 'm',
+    });
+
+    var response = await http.post(
+      Uri.parse('https://api.openrouteservice.org/v2/directions/foot-walking'),
+      headers: {
+        'Authorization': orsApiKey,
+        'Content-Type': 'application/json'
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      if (data['routes'] != null && data['routes'].isNotEmpty) {
+        // Get the encoded polyline string from the response
+        var encodedPolyline = data['routes'][0]['geometry'];
+
+        // Decode the polyline string into a list of LatLng points
+        List<PointLatLng> decodedPolyline = PolylinePoints().decodePolyline(encodedPolyline);
+
+        polylineCoordinates = decodedPolyline
+            .map<LatLng>((point) => LatLng(point.latitude, point.longitude))
+            .toList();
+
+        polylines.add(Polyline(
+          polylineId: PolylineId('route'),
+          points: polylineCoordinates,
+          width: 5,
+          color: Colors.blue,
+        ));
+
+        notifyListeners();
+      }
+    }
   }
 }

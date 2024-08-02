@@ -122,6 +122,8 @@ class MapSampleState extends State<MapsScreen> {
     return currentLocation == null
         ? Center(child: Text("Loading..."))
         : GoogleMap(
+      myLocationButtonEnabled: false,  // Disable My Location button
+      mapToolbarEnabled: false,
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
         target: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
@@ -145,6 +147,7 @@ class MapSampleState extends State<MapsScreen> {
       onTap: (LatLng position) {
         widget.onMapTap();
       },
+
     );
   }
 }
