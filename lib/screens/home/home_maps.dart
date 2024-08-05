@@ -63,6 +63,7 @@ class _HomeMapsState extends State<HomeMaps> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       drawer: Drawer(
         child: Column(
           children: <Widget>[

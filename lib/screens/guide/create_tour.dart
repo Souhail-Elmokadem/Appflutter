@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:guidanclyflutter/models/location_model.dart';
+import 'package:guidanclyflutter/models/tour_model.dart';
+import 'package:guidanclyflutter/services/tour_service.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,10 +16,14 @@ class CreateTour extends ChangeNotifier {
   final Completer<GoogleMapController> mapController = Completer();
   LocationData? currentLocation;
   List<LatLng> waypoints = [];
+  TourModel tourModel=  TourModel("",null,[]);
   Set<Marker> markers = {};
   List<LatLng> polylineCoordinates = [];
   Set<Polyline> polylines = {};
-  final String orsApiKey = '5b3ce3597851110001cf62486287ac99583d441baa536d57a8d1a6b4'; // Replace with your ORS API key
+  final TourService tourService = TourService();
+
+  final String orsApiKey =
+      '5b3ce3597851110001cf62486287ac99583d441baa536d57a8d1a6b4'; // Replace with your ORS API key
 
   CreateTour() {
     initializeCurrentLocation();
@@ -31,6 +38,13 @@ class CreateTour extends ChangeNotifier {
   Future<void> addWaypoint(LatLng point, String title) async {
     waypoints.add(point);
 
+    //tourModel.addstop(title,point.latitude.toString(),point.longitude.toString());
+
+
+
+      tourModel.stops?.add(LocationModel(title,point));
+
+
     // Create a custom marker with the title
     final markerIcon = await createCustomMarker(title);
 
@@ -44,10 +58,13 @@ class CreateTour extends ChangeNotifier {
           title: title,
         ),
       ),
+
     );
+
 
     notifyListeners();
   }
+
   Future<void> clearMarkersAndPolylines() async {
     waypoints.clear();
     markers.clear();
@@ -66,30 +83,46 @@ class CreateTour extends ChangeNotifier {
     const double spacing = 20.0; // Space between text and marker image
 
     // Calculate the width based on the text length
-    final double textWidth = title.length * 40.0+60;
-    const double textHeight =0.0; // Height of the text box
-
+    final double textWidth = title.length * 40.0 + 60;
+    const double textHeight = 0.0; // Height of the text box
 
     // Load the marker image from the assets
     final ByteData data = await rootBundle.load('assets/img/marker.png');
     final Uint8List markerBytes = data.buffer.asUint8List();
-    final ui.Codec codec = await ui.instantiateImageCodec(markerBytes, targetWidth: imageSize.toInt(), targetHeight: imageSize.toInt());
+    final ui.Codec codec = await ui.instantiateImageCodec(markerBytes,
+        targetWidth: imageSize.toInt(), targetHeight: imageSize.toInt());
     final ui.FrameInfo frameInfo = await codec.getNextFrame();
     final ui.Image markerImage = frameInfo.image;
 
     // Draw the marker image below the text with spacing
-    canvas.drawImage(markerImage, Offset((textWidth / 2) - (imageSize / 2), textHeight + spacing), Paint());
+    canvas.drawImage(
+        markerImage,
+        Offset((textWidth / 2) - (imageSize / 2), textHeight + spacing),
+        Paint());
 
     // Combine the text and image into one bitmap
     final ui.Picture picture = pictureRecorder.endRecording();
-    final ui.Image combinedImage = await picture.toImage(textWidth.toInt(), (imageSize + textHeight + spacing).toInt());
-    final ByteData? byteData = await combinedImage.toByteData(format: ui.ImageByteFormat.png);
+    final ui.Image combinedImage = await picture.toImage(
+        textWidth.toInt(), (imageSize + textHeight + spacing).toInt());
+    final ByteData? byteData =
+        await combinedImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List combinedImageBytes = byteData!.buffer.asUint8List();
 
     return BitmapDescriptor.fromBytes(combinedImageBytes);
   }
 
+  // Existing code...
 
+  Future<TourModel> saveTour(String tourName) async {
+    if (currentLocation == null || waypoints.isEmpty) {
+      print('No current location or waypoints available');
+      return TourModel("",null,[]);
+    }
+    print("===========================================");
+    tourModel.tourTitle= tourName;
+    tourModel.depart =  LocationModel("departCity", LatLng(currentLocation!.latitude!, currentLocation!.longitude!));
+    return tourModel;
+  }
 
   Set<Marker> getWaypoints() {
     return markers;
@@ -105,9 +138,8 @@ class CreateTour extends ChangeNotifier {
     polylineCoordinates.clear();
     polylines.clear();
 
-    List<List<double>> coordinates = waypoints
-        .map((point) => [point.longitude, point.latitude])
-        .toList();
+    List<List<double>> coordinates =
+        waypoints.map((point) => [point.longitude, point.latitude]).toList();
 
     var body = json.encode({
       'coordinates': coordinates,
@@ -118,10 +150,7 @@ class CreateTour extends ChangeNotifier {
 
     var response = await http.post(
       Uri.parse('https://api.openrouteservice.org/v2/directions/foot-walking'),
-      headers: {
-        'Authorization': orsApiKey,
-        'Content-Type': 'application/json'
-      },
+      headers: {'Authorization': orsApiKey, 'Content-Type': 'application/json'},
       body: body,
     );
 
@@ -132,7 +161,8 @@ class CreateTour extends ChangeNotifier {
         var encodedPolyline = data['routes'][0]['geometry'];
 
         // Decode the polyline string into a list of LatLng points
-        List<PointLatLng> decodedPolyline = PolylinePoints().decodePolyline(encodedPolyline);
+        List<PointLatLng> decodedPolyline =
+            PolylinePoints().decodePolyline(encodedPolyline);
 
         polylineCoordinates = decodedPolyline
             .map<LatLng>((point) => LatLng(point.latitude, point.longitude))

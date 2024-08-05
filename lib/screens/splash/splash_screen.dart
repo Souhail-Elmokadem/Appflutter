@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
           context,
           PageTransition(
-              child: accessToken!=null && accessToken!=""? CreateTourPage():const HomeMaps(), //Changed
+              child: accessToken!=null && accessToken!=""? CreateTourPage():const SignWithNumber(), //Changed
               type: PageTransitionType.fade,
               curve: Curves.bounceIn,
               duration: const Duration(milliseconds: 600)));

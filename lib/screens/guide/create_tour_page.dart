@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
+import 'package:guidanclyflutter/cubit/tour/tour_state.dart';
+import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
@@ -54,38 +58,59 @@ class _CreateTourPageState extends State<CreateTourPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset:
+    return BlocConsumer<TourCubit,TourState>(
+      listener: (context,state){
+        if(state is TourStateLoading){
+          print("loading");
+        }else if(state is TourStateSuccess){
+
+          print("success");
+
+        }else if (state is TourStateFailure){
+          print("failure !!!!!!");
+        }
+
+      },
+      builder: (context,state){
+        return Scaffold(
+          resizeToAvoidBottomInset:
           false, // Prevents resizing when the keyboard appears
-      appBar: AppBar(
-        title: const Text("Creation of tour",style: TextStyle(color: Colors.blue,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
-        backgroundColor: Colors.white,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: ElevatedButton(
-              onPressed: () async {
-               //
-              },
-              child: Text('Save'),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue,
-                elevation: 0,
+          appBar: AppBar(
+            title: const Text("Creation of tour",style: TextStyle(color: Colors.blue,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
+            backgroundColor: Colors.white,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: ElevatedButton(
+                    onPressed: () async {
+                      String tourName = _tourNameController.text.trim();
+                      if (tourName.isNotEmpty) {
+                        TourModel tourModel = await Provider.of<CreateTour>(context, listen: false).saveTour(tourName);
+                        await BlocProvider.of<TourCubit>(context).saveTour(tourModel);
+                      } else {
+                        print('Tour name cannot be empty');
+                      }
+                    },
+
+                  child: Text('Save'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
+                    elevation: 0,
 
 
-                textStyle: TextStyle(fontSize: 16),
+                    textStyle: TextStyle(fontSize: 16),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-      body: Consumer<CreateTour>(
-        builder: (context, createTour, child) {
-          if (createTour.currentLocation == null) {
-            return Center(child: CircularProgressIndicator());
-          } else {
-            return Column(
+          body: Consumer<CreateTour>(
+            builder: (context, createTour, child) {
+              if (createTour.currentLocation == null) {
+                return Center(child: CircularProgressIndicator());
+              } else {
+                return Column(
                   children: [
                     Container(
                       width: double.infinity,
@@ -141,7 +166,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
                             },
                             onTap: (position) async {
                               String? title =
-                                  await _promptForMarkerTitle(context);
+                              await _promptForMarkerTitle(context);
                               if (title != null) {
                                 await createTour.addWaypoint(position, title);
                                 createTour.notifyListeners();
@@ -216,7 +241,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
                                   ),
                                   child: IconButton(
                                     onPressed: () {
-                                     _handleMoveToCurrentLocation();
+                                      _handleMoveToCurrentLocation();
                                     },
                                     icon: Icon(Icons.near_me_rounded, color: mainColor),
                                   ),
@@ -229,15 +254,20 @@ class _CreateTourPageState extends State<CreateTourPage> {
                     ),
                   ],
                 );
-          }
-        },
-      ),
+              }
+            },
+          ),
+
+        );
+      },
     );
   }
 
   @override
   void dispose() {
+
     _tourfocus.dispose();
+    _tourNameController.dispose();
   }
 
   Future<String?> _promptForMarkerTitle(BuildContext context) async {

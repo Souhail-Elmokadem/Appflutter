@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guidanclyflutter/cubit/Auth/auth_cubit.dart';
 import 'package:guidanclyflutter/cubit/layout/layout_cubit.dart';
+import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/screens/Auth/SignIn.dart';
 import 'package:guidanclyflutter/screens/Auth/signup.dart';
 import 'package:guidanclyflutter/screens/guide/create_tour.dart';
+import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/screens/onboard/welcome.dart';
 import 'package:guidanclyflutter/screens/splash/splash_screen.dart';
 import 'package:guidanclyflutter/shared/constants/constants.dart';
@@ -34,6 +36,7 @@ class _GuidanclyState extends State<Guidancly> {
       providers: [
         BlocProvider(create: (context)=> Authcubit()),
         BlocProvider(create: (context) => LayoutCubit()..getUserData()),
+        BlocProvider(create: (context)=> TourCubit()),
         ChangeNotifierProvider<CreateTour>(
           create: (_) => CreateTour(),
         ),
