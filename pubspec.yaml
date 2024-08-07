@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_svg: ^2.0.10
   shared_preferences: ^2.2.3
   jwt_decoder: ^2.0.1
   page_transition: ^2.1.0
@@ -100,6 +101,10 @@ flutter:
      - family: sf-ui
        fonts:
           - asset: fonts/sf-ui-display-semibold.otf
+          - asset: fonts/sf-ui-display-light.otf
+            weight: 100
+          - asset: fonts/sf-ui-display-medium.otf
+            weight: 400
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

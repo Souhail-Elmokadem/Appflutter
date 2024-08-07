@@ -6,8 +6,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_state.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
+import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:location/location.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'create_tour.dart';
 
@@ -45,6 +47,48 @@ class _CreateTourPageState extends State<CreateTourPage> {
   }
   bool _isTourFocus = false;
 
+
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          alignment: Alignment.center,
+          child: Image.asset("assets/img/loader.gif"),
+        );
+      },
+    );
+  }
+
+  void _showSnackBar(BuildContext context, String message, Color backgroundColor) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: backgroundColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Message"),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,13 +105,22 @@ class _CreateTourPageState extends State<CreateTourPage> {
     return BlocConsumer<TourCubit,TourState>(
       listener: (context,state){
         if(state is TourStateLoading){
-          print("loading");
+          _showLoadingDialog(context);
         }else if(state is TourStateSuccess){
-
-          print("success");
+          _showSnackBar(context, "Tour ${_tourNameController.text} Created", mainColor);
+          Navigator.pushAndRemoveUntil(
+              context,
+              PageTransition(
+                child:  Home(),
+                type: PageTransitionType.fade,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeIn,
+              ),
+              ModalRoute.withName('/'));
 
         }else if (state is TourStateFailure){
-          print("failure !!!!!!");
+          Navigator.of(context).pop();
+          _showErrorDialog(context, "Problem !");
         }
 
       },
@@ -265,7 +318,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
 
   @override
   void dispose() {
-
+    super.dispose();
     _tourfocus.dispose();
     _tourNameController.dispose();
   }

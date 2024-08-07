@@ -118,7 +118,7 @@ class CreateTour extends ChangeNotifier {
       print('No current location or waypoints available');
       return TourModel("",null,[]);
     }
-    print("===========================================");
+      print("===========================================");
     tourModel.tourTitle= tourName;
     tourModel.depart =  LocationModel("departCity", LatLng(currentLocation!.latitude!, currentLocation!.longitude!));
     return tourModel;
