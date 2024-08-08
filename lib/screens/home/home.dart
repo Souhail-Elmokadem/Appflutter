@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,12 +13,13 @@ import 'package:guidanclyflutter/shared/shared_preferences/sharedNatwork.dart';
 class Home extends StatelessWidget {
   Home({super.key});
 
-  List<TourModel> iteams = [
+  List<TourModel> items = [
     new TourModel(
         "Nilandri Reservoir", new LocationModel("madinati", LatLng(22, 33)), []),
     new TourModel("anasi", new LocationModel("jama3", LatLng(22, 33)), []),
     new TourModel("2mars", new LocationModel("macdo", LatLng(22, 33)), []),
   ];
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LayoutCubit, LayoutState>(listener: (context, state) {
@@ -28,277 +30,431 @@ class Home extends StatelessWidget {
         return Scaffold(
           body: SafeArea(
             child: SingleChildScrollView(
-              child: Container(
-                child: Column(
-                  children: [
-                    // Text(
-                    //     'Hi ${state.user.firstName?.toUpperCase() ?? "No first name"} !',style: const TextStyle(fontSize: 40,fontFamily: 'sf-ui',color: Colors.black45),),
-              
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(left: 25, right: 25, top: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            height: 45,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25, right: 25, top: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          height: 45,
+                          decoration: BoxDecoration(
+                              color: Color(0xfff7f7f9),
+                              borderRadius: BorderRadius.circular(25)),
+                          padding: EdgeInsets.only(
+                              left: 5, top: 5, bottom: 5, right: 10),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                child: Image.asset(
+                                  "assets/img/google.png",
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "${state.user.firstName?.toUpperCase()}" ??
+                                    "No first name",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'sf-ui',
+                                    fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: 45,
+                          width: 45,
+                          decoration: BoxDecoration(
+                              color: const Color(0xfff7f7f9),
+                              borderRadius: BorderRadius.circular(25)),
+                          child: IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.add_alert),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25, right: 25, top: 15),
+                    child: Container(
+                      alignment: Alignment.topLeft,
+                      margin: EdgeInsets.only(top: 25),
+                      child: RichText(
+                          text: const TextSpan(children: [
+                            TextSpan(
+                                text: "Explore The\n",
+                                style: TextStyle(
+                                    color: fourColor,
+                                    fontSize: 30,
+                                    fontFamily: 'sf-ui',
+                                    fontWeight: FontWeight.w100)),
+                            TextSpan(
+                                text: "Beautiful World !",
+                                style: TextStyle(
+                                    color: fourColor,
+                                    fontSize: 35,
+                                    fontFamily: 'sf-ui',
+                                    fontWeight: FontWeight.bold)),
+                          ])),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 25,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Best Destination",
+                          style: TextStyle(
+                              fontFamily: 'sf-ui',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text(
+                            "View all",
+                            style: TextStyle(
+                                fontFamily: 'sf-ui',
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    height: 450,
+                    width: double.infinity,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: 290,
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          margin: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Container(
                             decoration: BoxDecoration(
-                                color: Color(0xfff7f7f9),
-                                borderRadius: BorderRadius.circular(25)),
-                            padding: EdgeInsets.only(
-                                left: 5, top: 5, bottom: 5, right: 10),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  child: Image.asset(
-                                    "assets/img/google.png",
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  "${state.user.firstName?.toUpperCase()}" ??
-                                      "No first name",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontFamily: 'sf-ui',
-                                      fontSize: 16),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  spreadRadius: 0.1,
+                                  offset: Offset(0, 4), // Shadow position
                                 ),
                               ],
                             ),
-                          ),
-                          Container(
-                            height: 45,
-                            width: 45,
-                            decoration: BoxDecoration(
-                                color: const Color(0xfff7f7f9),
-                                borderRadius: BorderRadius.circular(25)),
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.add_alert),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: MediaQuery.of(context).size.width - 50,
+                                  height: 280,
+                                  margin: EdgeInsets.all(15),
+                                  decoration: BoxDecoration(
+                                      color: Colors.black87,
+                                      borderRadius: BorderRadius.circular(25)),
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(25),
+                                      child: Image.asset(
+                                        "assets/img/image.png",
+                                        fit: BoxFit.cover,
+                                      )),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 25, vertical: 10),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            items[index].tourTitle!,
+                                            style: const TextStyle(
+                                                fontSize: 20,
+                                                fontFamily: 'sf-ui',
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          const Row(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  size: 22,
+                                                  color: Colors.yellow,
+                                                ),
+                                                SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Text(
+                                                  "4.7",
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      fontFamily: 'sf-ui',
+                                                      fontWeight:
+                                                      FontWeight.w400),
+                                                ),
+                                              ]),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 8,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              SvgPicture.asset(
+                                                "assets/img/locationIcon2.svg",
+                                                width: 20,
+                                                height: 20,
+                                                color: Colors.grey[400],
+                                              ),
+                                              SizedBox(
+                                                width: 8,
+                                              ),
+                                              Text(
+                                                "Casa, Azhar",
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontFamily: 'sf-ui',
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Colors.grey[400]),
+                                              )
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              SvgPicture.asset(
+                                                "assets/img/tourism.svg",
+                                                width: 25,
+                                                height: 25,
+                                                color: Colors.orangeAccent[100],
+                                              ),
+                                              Text(
+                                                " 99+",
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontFamily: 'sf-ui',
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Colors.orangeAccent[100]),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(left: 25, right: 25, top: 15),
-                      child: Container(
-                        alignment: Alignment.topLeft,
-                        margin: EdgeInsets.only(top: 25),
-                        child: RichText(
-                            text: const TextSpan(children: [
-                          TextSpan(
-                              text: "Explore The\n",
-                              style: TextStyle(
-                                  color: fourColor,
-                                  fontSize: 30,
-                                  fontFamily: 'sf-ui',
-                                  fontWeight: FontWeight.w100)),
-                          TextSpan(
-                              text: "Beautiful World !",
-                              style: TextStyle(
-                                  color: fourColor,
-                                  fontSize: 35,
-                                  fontFamily: 'sf-ui',
-                                  fontWeight: FontWeight.bold)),
-                        ])),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 25,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: Container(
+                      alignment: Alignment.centerLeft,
+                      child: const Column(
                         children: [
-                          const Text(
-                            "Best Destination",
+                          Text(
+                            "All popular Places",
                             style: TextStyle(
                                 fontFamily: 'sf-ui',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w400),
                           ),
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text(
-                              "View all",
-                              style: TextStyle(
-                                  fontFamily: 'sf-ui',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                          )
                         ],
                       ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      height: 450,
-                      width: double.infinity,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: iteams.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            width: 290,
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            margin: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(25),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    spreadRadius: 0.1,
-                                    offset: Offset(0, 4), // Shadow position
-                                  ),
-                                ],
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
+                    child: GridView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10.0,
+                        mainAxisSpacing: 10.0,
+                        childAspectRatio: 3 / 4,
+                        mainAxisExtent: 280,
+
+                      ),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                                offset: Offset(0, 4), // Shadow position
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: MediaQuery.of(context).size.width - 50,
-                                    height: 280,
-                                    margin: EdgeInsets.all(15),
-                                    decoration: BoxDecoration(
-                                        color: Colors.black87,
-                                        borderRadius: BorderRadius.circular(25)),
-                                    child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(25),
-                                        child: Image.asset(
-                                          "assets/img/image.png",
-                                          fit: BoxFit.cover,
-                                        )),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 25, vertical: 10),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              iteams[index].tourTitle!,
-                                              style: const TextStyle(
-                                                  fontSize: 20,
-                                                  fontFamily: 'sf-ui',
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            const Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.star,
-                                                    size: 22,
-                                                    color: Colors.yellow,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Text(
-                                                    "4.7",
-                                                    style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontFamily: 'sf-ui',
-                                                        fontWeight:
-                                                            FontWeight.w400),
-                                                  ),
-                                                ]),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:   MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                  SvgPicture.asset("assets/img/locationIcon2.svg",
-                                                  width: 20, height: 20, color: Colors.grey[400],
-                                                  ),
-                                                SizedBox(width: 8,),
-                                                Text(
-                                                  "Casa, Azhar",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontFamily: 'sf-ui',
-                                                      fontWeight: FontWeight.w400,
-                                                      color: Colors.grey[400]),
-                                                )
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                SvgPicture.asset("assets/img/tourism.svg",
-                                                  width: 25, height: 25, color: Colors.orangeAccent[100],
-                                                ),
-                                                Text(
-                                                  " 99+",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontFamily: 'sf-ui',
-                                                      fontWeight: FontWeight.w400,
-                                                      color: Colors.orangeAccent[100]),
-                                                )
-              
-                                              ],
-                                            )
-                                          ],
-                                        )
-                                      ],
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: 140,
+
+                                margin: EdgeInsets.all(15),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(25)),
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Image.asset("assets/img/image.png",fit: BoxFit.cover,)),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 5),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      items[index].tourTitle!,
+                                      style: const TextStyle(
+                                          fontFamily: 'sf-ui',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700),
                                     ),
-                                  )
-                                ],
+                                    SizedBox(height: 5,),
+
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset(
+                                            "assets/img/locationIcon2.svg",
+                                            width: 20,
+                                            height: 20,
+                                            color: Colors.grey[400],
+                                          ),
+                                          SizedBox(
+                                            width: 8,
+                                          ),
+                                          Text(
+                                            "Casa, Azhar",
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontFamily: 'sf-ui',
+                                                fontWeight: FontWeight.w400,
+                                                color: Colors.grey[400]),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5,),
+                                    const Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            size: 22,
+                                            color: Colors.yellow,
+                                          ),Icon(
+                                            Icons.star,
+                                            size: 22,
+                                            color: Colors.yellow,
+                                          ),Icon(
+                                            Icons.star,
+                                            size: 22,
+                                            color: Colors.yellow,
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            "4.7",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: 'sf-ui',
+                                                fontWeight:
+                                                FontWeight.w400),
+                                          ),
+                                        ]),
+                                    SizedBox(height: 5,),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 10),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                              Icons.attach_money,
+                                              size: 22,
+                                              color: Colors.blueAccent,
+                                            ),
+                                            const Text(
+                                              "470",
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontFamily: 'sf-ui',
+                                                  fontWeight:
+                                                  FontWeight.w400),
+                                            ),
+                                            Text(
+                                              "/person",
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontFamily: 'sf-ui',
+                                                  color: Colors.grey[400],
+                                                  fontWeight:
+                                                  FontWeight.w400),
+                                            )
+                                          ]),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        child: const Column(
-                          children: [
-                            Text("All popular Places",
-                              style: TextStyle(
-                                fontFamily: 'sf-ui',
-                                fontSize: 18,
-                                fontWeight: FontWeight.w400),),
-
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         );
       } else if (state is LayoutFailure) {
-        return Center(
-            child: Text('Failed to load user data: ${state.message}'));
+        return Center(child: Text('Failed to load user data: ${state.message}'));
       } else {
         return Scaffold(
           body: Center(
