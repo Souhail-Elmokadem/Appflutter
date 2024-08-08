@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:guidanclyflutter/screens/widgets/bottom_navigation_bar.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -9,28 +10,67 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: CustomBottomNavigationBar(
+        onItemTapped: _onItemTapped,
+        selectedIndex: _selectedIndex,
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             // Profile Header
             Container(
-              margin: EdgeInsets.fromLTRB(10, 15, 10, 30),
+              margin: EdgeInsets.fromLTRB(10, 25, 10, 30),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }, 
-                  icon: Icon(Icons.arrow_back),
-                ),
-
-                  Text("Profile", 
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Container(
+                      height: 45,
+                      width: 45,
+                      decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(25)),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        size: 13,
+                        color: fourColor,
+                      ),
+                    ),
+                  ),
+                  Text("Profile",
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'sf-ui',
+                          fontWeight: FontWeight.bold)),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Container(
+                      height: 45,
+                      width: 45,
+                      decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(25)),
+                      child: const Icon(
+                        Icons.edit_outlined,
+                        size: 23,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -49,34 +89,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     SizedBox(height: 10),
                     Text(
                       "Med L7way",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 5),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.location_on_sharp),
-                            Text(
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Icon(Icons.location_on_sharp),
+                      Text(
                         "Casablanca",
                         style: TextStyle(fontSize: 16, color: Colors.grey),
-                        )
-                          ]
-                      ),
-                    
+                      )
+                    ]),
+
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Column(
                           children: [
-                            Text("Visited Place", style: TextStyle(fontSize: 16, color: Colors.grey)),
-                            Text("1k+", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text("Visited Place",
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.grey)),
+                            Text("1k+",
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         Column(
                           children: [
-                            Text("Tours", style: TextStyle(fontSize: 16, color: Colors.grey)),
-                            Text("1k+", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text("Tours",
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.grey)),
+                            Text("1k+",
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ],
@@ -92,22 +138,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         children: [
                           Text("Previous Tours",
-                          style: 
-                          TextStyle(
-                            fontWeight: FontWeight.bold
-                          )),
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                           ReviewCard(
                             name: "Tour 1",
                             date: "08-10-20",
-                            review:
-                                "Visiting Marrakech Was a good Place...",
+                            review: "Visiting Marrakech Was a good Place...",
                           ),
                           SizedBox(height: 10),
                           ReviewCard(
                             name: "Tour 2",
                             date: "08-10-20",
-                            review:
-                                "Visiting Marrakech Was a good Place...",
+                            review: "Visiting Marrakech Was a good Place...",
                           ),
                         ],
                       ),
@@ -136,7 +177,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Text(
                         "Next Tour",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Text(
                         "Guide Name",
@@ -150,7 +192,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Text(
                         "Sep, 2020",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       IconButton(
                         onPressed: () {},
@@ -187,7 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ElevatedButton(
                           onPressed: () {},
                           child: Text("View More Details ...",
-                          style: TextStyle(color:Colors.white)),
+                              style: TextStyle(color: Colors.white)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: mainColor,
                             minimumSize: Size(double.infinity, 50),
@@ -238,7 +281,8 @@ class ReviewCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(name,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               Text(date, style: TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),

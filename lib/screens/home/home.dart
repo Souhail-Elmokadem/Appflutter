@@ -7,18 +7,32 @@ import 'package:guidanclyflutter/cubit/layout/layout_cubit.dart';
 import 'package:guidanclyflutter/cubit/layout/layout_state.dart';
 import 'package:guidanclyflutter/models/location_model.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
+import 'package:guidanclyflutter/screens/widgets/bottom_navigation_bar.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:guidanclyflutter/shared/shared_preferences/sharedNatwork.dart';
 
-class Home extends StatelessWidget {
-  Home({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
 
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   List<TourModel> items = [
     new TourModel(
         "Nilandri Reservoir", new LocationModel("madinati", LatLng(22, 33)), []),
     new TourModel("anasi", new LocationModel("jama3", LatLng(22, 33)), []),
     new TourModel("2mars", new LocationModel("macdo", LatLng(22, 33)), []),
   ];
+
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +42,10 @@ class Home extends StatelessWidget {
       final cubit = BlocProvider.of<LayoutCubit>(context);
       if (state is LayoutSuccess) {
         return Scaffold(
+          bottomNavigationBar: CustomBottomNavigationBar(
+            selectedIndex: _selectedIndex,
+            onItemTapped: _onItemTapped,
+          ),
           body: SafeArea(
             child: SingleChildScrollView(
               child: Column(
@@ -306,13 +324,12 @@ class Home extends StatelessWidget {
                         crossAxisSpacing: 10.0,
                         mainAxisSpacing: 10.0,
                         childAspectRatio: 3 / 4,
-                        mainAxisExtent: 280,
+                        mainAxisExtent: 290,
 
                       ),
                       itemCount: items.length,
                       itemBuilder: (context, index) {
                         return Container(
-
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(25),
@@ -408,7 +425,7 @@ class Home extends StatelessWidget {
                                                 FontWeight.w400),
                                           ),
                                         ]),
-                                    SizedBox(height: 5,),
+                                    SizedBox(height: 8,),
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 10),
                                       child: Row(
