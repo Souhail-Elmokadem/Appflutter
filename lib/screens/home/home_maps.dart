@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:guidanclyflutter/screens/Settings/settings_screen.dart';
 import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
 import 'package:guidanclyflutter/screens/widgets/maps_screen.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
@@ -85,7 +86,12 @@ class _HomeMapsState extends State<HomeMaps> {
             ListTile(
               leading: Icon(Icons.settings),
               title: Text('Settings'),
-              onTap: () {},
+              onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SettingScreen()),
+                        );
+                      },
             ),
           ],
         ),
