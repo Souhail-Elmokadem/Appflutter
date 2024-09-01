@@ -16,22 +16,29 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.business),
+          icon: Icon(Icons.message),
           label: 'Messages',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.school),
-          label: 'School',
+          icon: Icon(Icons.tour_outlined),
+          label: 'Tours',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
         ),
       ],
       currentIndex: selectedIndex,
       selectedItemColor: Colors.amber[800],
+      unselectedItemColor: Colors.grey[400],
+      unselectedLabelStyle: TextStyle(color: Colors.grey[400]),
       onTap: onItemTapped,
     );
   }

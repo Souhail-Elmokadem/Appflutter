@@ -7,6 +7,7 @@ import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_state.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/screens/home/home.dart';
+import 'package:guidanclyflutter/services/message_dialog_service.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:location/location.dart';
 import 'package:page_transition/page_transition.dart';
@@ -23,6 +24,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
   final FocusNode _tourfocus = FocusNode();
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   final CreateTour createTour = CreateTour();
+  MessageDialogService messageDialogService = MessageDialogService();
 
   LocationData? currentLocation;
   Future<void> _handleMoveToCurrentLocation() async {
@@ -49,17 +51,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
 
 
 
-  void _showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          alignment: Alignment.center,
-          child: Image.asset("assets/img/loader.gif"),
-        );
-      },
-    );
-  }
+
 
   void _showSnackBar(BuildContext context, String message, Color backgroundColor) {
     final snackBar = SnackBar(
@@ -69,25 +61,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void _showErrorDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Message"),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 
   @override
   void initState() {
@@ -105,7 +79,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
     return BlocConsumer<TourCubit,TourState>(
       listener: (context,state){
         if(state is TourStateLoading){
-          _showLoadingDialog(context);
+          messageDialogService.showLoadingDialog(context);
         }else if(state is TourStateSuccess){
           _showSnackBar(context, "Tour ${_tourNameController.text} Created", mainColor);
           Navigator.pushAndRemoveUntil(
@@ -120,7 +94,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
 
         }else if (state is TourStateFailure){
           Navigator.of(context).pop();
-          _showErrorDialog(context, "Problem !");
+          messageDialogService.showErrorDialog(context, "Problem !");
         }
 
       },
@@ -138,10 +112,14 @@ class _CreateTourPageState extends State<CreateTourPage> {
                     onPressed: () async {
                       String tourName = _tourNameController.text.trim();
                       if (tourName.isNotEmpty) {
-                        TourModel tourModel = await Provider.of<CreateTour>(context, listen: false).saveTour(tourName);
+
+                        final arg = (ModalRoute.of(context)?.settings.arguments ?? <String,dynamic> {}) as Map;
+                        TourModel tourModel = await Provider.of<CreateTour>(context, listen: false).saveTour(tourName,arg['about'],double.parse(arg['price']),arg['images']);
                         await BlocProvider.of<TourCubit>(context).saveTour(tourModel);
                       } else {
+
                         print('Tour name cannot be empty');
+
                       }
                     },
 

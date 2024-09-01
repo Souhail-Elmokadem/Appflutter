@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:guidanclyflutter/screens/profile/edit_profile_screen.dart';
 import 'package:guidanclyflutter/screens/widgets/bottom_navigation_bar.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
+import 'package:page_transition/page_transition.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -21,10 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: CustomBottomNavigationBar(
-        onItemTapped: _onItemTapped,
-        selectedIndex: _selectedIndex,
-      ),
+
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -57,7 +56,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontFamily: 'sf-ui',
                           fontWeight: FontWeight.bold)),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(context,MaterialPageRoute(builder: (context) => EditProfileScreen(),) );
+                    },
                     icon: Container(
                       height: 45,
                       width: 45,
@@ -88,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      "Med L7way",
+                      "souhail test",
                       style:
                           TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),

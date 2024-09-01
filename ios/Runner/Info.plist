@@ -8,6 +8,10 @@
 <string>This app needs access to location when open.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to your photo library to pick images.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>We need access to your camera to take photos.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Guidanclyflutter</string>
 	<key>CFBundleExecutable</key>

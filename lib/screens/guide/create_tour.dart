@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:guidanclyflutter/environnement/environnement.prod.dart';
 import 'package:guidanclyflutter/models/location_model.dart';
+import 'package:guidanclyflutter/models/stop_model.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/services/tour_service.dart';
 import 'package:location/location.dart';
@@ -16,14 +20,13 @@ class CreateTour extends ChangeNotifier {
   final Completer<GoogleMapController> mapController = Completer();
   LocationData? currentLocation;
   List<LatLng> waypoints = [];
-  TourModel tourModel=  TourModel("",null,[]);
+  TourModel tourModel=  TourModel("",null,"",[],0,[]);
   Set<Marker> markers = {};
   List<LatLng> polylineCoordinates = [];
   Set<Polyline> polylines = {};
   final TourService tourService = TourService();
 
-  final String orsApiKey =
-      '5b3ce3597851110001cf62486287ac99583d441baa536d57a8d1a6b4'; // Replace with your ORS API key
+  final String orsApiKey = orsmApiKey; // Replace with your ORS API key
 
   CreateTour() {
     initializeCurrentLocation();
@@ -33,6 +36,7 @@ class CreateTour extends ChangeNotifier {
     Location location = Location();
     currentLocation = await location.getLocation();
     notifyListeners();
+
   }
 
   Future<void> addWaypoint(LatLng point, String title) async {
@@ -42,11 +46,11 @@ class CreateTour extends ChangeNotifier {
 
 
 
-      tourModel.stops?.add(LocationModel(title,point));
+      tourModel.stops?.add(StopModel(name: title,location: LocationModel(point)));
 
 
     // Create a custom marker with the title
-    final markerIcon = await createCustomMarker(title);
+    final markerIcon = await createCustomMarker(title,"");
 
     // Add the marker to the set of markers
     markers.add(
@@ -73,7 +77,7 @@ class CreateTour extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<BitmapDescriptor> createCustomMarker(String title) async {
+  Future<BitmapDescriptor> createCustomMarker(String title,String url) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
 
@@ -83,11 +87,11 @@ class CreateTour extends ChangeNotifier {
     const double spacing = 20.0; // Space between text and marker image
 
     // Calculate the width based on the text length
-    final double textWidth = title.length * 40.0 + 60;
+    final double textWidth = title!.length * 40.0 + 60;
     const double textHeight = 0.0; // Height of the text box
 
     // Load the marker image from the assets
-    final ByteData data = await rootBundle.load('assets/img/marker.png');
+    final ByteData data = await rootBundle.load(url !=""?url:'assets/img/destination.png');
     final Uint8List markerBytes = data.buffer.asUint8List();
     final ui.Codec codec = await ui.instantiateImageCodec(markerBytes,
         targetWidth: imageSize.toInt(), targetHeight: imageSize.toInt());
@@ -113,14 +117,17 @@ class CreateTour extends ChangeNotifier {
 
   // Existing code...
 
-  Future<TourModel> saveTour(String tourName) async {
+  Future<TourModel> saveTour(String tourName, String descriptionarg, double price,List<File> listimage) async {
     if (currentLocation == null || waypoints.isEmpty) {
       print('No current location or waypoints available');
-      return TourModel("",null,[]);
+      return TourModel("",null,"",[],0,[]);
     }
       print("===========================================");
     tourModel.tourTitle= tourName;
-    tourModel.depart =  LocationModel("departCity", LatLng(currentLocation!.latitude!, currentLocation!.longitude!));
+    tourModel.description=descriptionarg;
+    tourModel.depart =  StopModel(name: "departTour", location:  LocationModel(LatLng(markers.first.position.latitude, markers.first.position.longitude)));
+    tourModel.price=price;
+    tourModel.images=listimage;
     return tourModel;
   }
 

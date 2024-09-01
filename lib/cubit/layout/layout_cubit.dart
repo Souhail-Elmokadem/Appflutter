@@ -10,7 +10,7 @@ import 'package:http_interceptor/http_interceptor.dart';
 
 final http.Client client = InterceptedClient.build(
   interceptors: [AuthInterceptor()],
-  requestTimeout: const Duration(seconds: 10),
+  requestTimeout: const Duration(seconds: 30),
 );
 
 class LayoutCubit extends Cubit<LayoutState> {

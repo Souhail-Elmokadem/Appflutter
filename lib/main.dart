@@ -6,6 +6,9 @@ import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/screens/Auth/SignIn.dart';
 import 'package:guidanclyflutter/screens/Auth/signup.dart';
 import 'package:guidanclyflutter/screens/guide/create_tour.dart';
+import 'package:guidanclyflutter/screens/guide/create_tour_cotes.dart';
+import 'package:guidanclyflutter/screens/guide/create_tour_details.dart';
+import 'package:guidanclyflutter/screens/guide/create_tour_page.dart';
 import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/screens/onboard/welcome.dart';
 import 'package:guidanclyflutter/screens/splash/splash_screen.dart';
@@ -36,7 +39,7 @@ class _GuidanclyState extends State<Guidancly> {
       providers: [
         BlocProvider(create: (context)=> Authcubit()),
         BlocProvider(create: (context) => LayoutCubit()..getUserData()),
-        BlocProvider(create: (context)=> TourCubit()),
+        BlocProvider(create: (context)=> TourCubit()..getTours()..getToursPopular()),
         ChangeNotifierProvider<CreateTour>(
           create: (_) => CreateTour(),
         ),
@@ -50,6 +53,9 @@ class _GuidanclyState extends State<Guidancly> {
           '/welcome':(context) => const Welcome(),
           '/signIn':(context) => const SignIn(),
           '/signUp':(context) => const SignUp(),
+          '/createTour':(context) =>  CreateTourPage(),
+          '/createTourCotes':(context) => CreateTourCotes(),
+          '/createTourdetails':(context) => CreateTourDetails(),
 
         },
       ),

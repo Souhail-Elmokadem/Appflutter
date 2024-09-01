@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:guidanclyflutter/screens/Auth/signInWithNumber.dart';
 import 'package:guidanclyflutter/screens/Auth/signup.dart';
+import 'package:guidanclyflutter/screens/guide/create_tour_details.dart';
+import 'package:guidanclyflutter/screens/guide/create_tour_cotes.dart';
 import 'package:guidanclyflutter/screens/guide/create_tour_page.dart';
 import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/screens/home/home_maps.dart';
@@ -41,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
           context,
           PageTransition(
-              child: accessToken!=null && accessToken!=""? ProfileScreen():const SignWithNumber(), //Changed
+              child: accessToken!=null && accessToken!=""? Home():const SignWithNumber(), //Changed
               type: PageTransitionType.fade,
               curve: Curves.bounceIn,
               duration: const Duration(milliseconds: 600)));

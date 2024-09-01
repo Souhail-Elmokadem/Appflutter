@@ -3,18 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:guidanclyflutter/services/tour_service.dart';
 import 'package:guidanclyflutter/shared/constants/constants.dart';
 import 'package:location/location.dart';
 
 class MapsScreen extends StatefulWidget {
-  final Function() onMapTap;
+  final Completer<GoogleMapController> controller;
   final Function() onMoveToCurrentLocation;
-  final Completer<GoogleMapController> controller; // Accept the controller here
+  final Function() onMapTap;
+  final Function() onMapCreated;
+  final Set<Marker> markers;
 
   MapsScreen({
-    required this.onMapTap,
+    required this.controller,
     required this.onMoveToCurrentLocation,
-    required this.controller, // Accept the controller here
+    required this.onMapTap,
+    required this.markers,
+    required this.onMapCreated
   });
   @override
   State<MapsScreen> createState() => MapSampleState();
@@ -28,12 +33,15 @@ class MapSampleState extends State<MapsScreen> {
   bool locationFetched = false;
   List<LatLng> polyCord = [];
   LocationData? currentLocation;
+  TourService tourService = TourService();
+
 
   @override
   void initState() {
     super.initState();
     distancePolyline();
     getCurrentLocation();
+
   }
 
   Future<void> getCurrentPosition() async {
@@ -132,17 +140,16 @@ class MapSampleState extends State<MapsScreen> {
       polylines: {
         Polyline(polylineId: PolylineId("route"), points: polyCord),
       },
-      markers: {
-        Marker(
-            markerId: MarkerId("current"),
-            position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!)),
-        Marker(markerId: MarkerId("dst"), position: LatLng(defaultLocation.latitude, defaultLocation.longitude)),
-      },
+      markers: widget.markers,
       onMapCreated: (GoogleMapController controller) {
+
         widget.controller.complete(controller); // Complete the controller from widget
         if (cameraPosition != null) {
           controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition!));
+
         }
+        widget.onMapCreated();
+
       },
       onTap: (LatLng position) {
         widget.onMapTap();
