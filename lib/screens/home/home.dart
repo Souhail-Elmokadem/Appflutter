@@ -12,9 +12,12 @@ import 'package:guidanclyflutter/models/location_model.dart';
 import 'package:guidanclyflutter/models/stop_model.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
+import 'package:guidanclyflutter/models/visitor_model.dart';
 import 'package:guidanclyflutter/screens/home/home_maps.dart';
 import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
+import 'package:guidanclyflutter/screens/tour/tour_details.dart';
 import 'package:guidanclyflutter/screens/widgets/bottom_navigation_bar.dart';
+import 'package:guidanclyflutter/screens/widgets/tour_card_current.dart';
 import 'package:guidanclyflutter/services/tour_service.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:guidanclyflutter/shared/shared_preferences/sharedNatwork.dart';
@@ -31,25 +34,19 @@ class _HomeState extends State<Home> {
    List<TourModelReceive> items =[];
    List<TourModelReceive> itemsPopular =[];
   TourService tourService = TourService();
-  int _selectedIndex = 0;
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  VisitorModel? visitorModel;
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LayoutCubit, LayoutState>(
         listener: (context, state) {
-      if (state is LayoutSuccess) {}
+      if (state is LayoutSuccess) {
+        visitorModel=state.userdetail;
+      }
     }, builder: (context, state) {
-      final cubit = BlocProvider.of<LayoutCubit>(context);
-
       if (state is LayoutSuccess) {
         return Scaffold(
-
           body: SafeArea(
             child: SingleChildScrollView(
               child: Column(
@@ -59,33 +56,40 @@ class _HomeState extends State<Home> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                              color: Color(0xfff7f7f9),
-                              borderRadius: BorderRadius.circular(25)),
-                          padding: EdgeInsets.only(
-                              left: 5, top: 5, bottom: 5, right: 10),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                child: Image.network(
-                                  state.user!.avatar!.replaceAll("localhost", domain),
-                                  fit: BoxFit.cover,
+                        GestureDetector(
+                          onTap: (){
+                            Navigator.push(context,
+                                PageTransition(child: ProfileScreen(userModel: state.userdetail),
+                                    type: PageTransitionType.rightToLeftWithFade));
+                          },
+                          child: Container(
+                            height: 45,
+                            decoration: BoxDecoration(
+                                color: Color(0xfff7f7f9),
+                                borderRadius: BorderRadius.circular(25)),
+                            padding: EdgeInsets.only(
+                                left: 5, top: 5, bottom: 5, right: 10),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  child: Image.network(
+                                    state.user!.avatar!.replaceAll("localhost", domain),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                "${state.user.firstName?.toUpperCase()}" ??
-                                    "No first name",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontFamily: 'sf-ui',
-                                    fontSize: 16),
-                              ),
-                            ],
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  "${state.user.firstName?.toUpperCase()} (${state.user.role})" ??
+                                      "No first name",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: 'sf-ui',
+                                      fontSize: 16),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         Container(
@@ -103,13 +107,13 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   BlocConsumer<TourCubit,TourState>(
-                    listener: (context,state){},
+                    listener: (context,state){
+
+                    },
                     builder: (context,state){
                       BlocProvider.of<TourCubit>(context).listTours!=null?
                       items = BlocProvider.of<TourCubit>(context).listTours: items=[];
-                      BlocProvider.of<TourCubit>(context).listToursPopular!=null?
-                      itemsPopular = BlocProvider.of<TourCubit>(context).listToursPopular: itemsPopular=[];
-
+                      itemsPopular = items;
                       return Wrap(
                       children: [
                         Padding(
@@ -139,6 +143,16 @@ class _HomeState extends State<Home> {
                         SizedBox(
                           height: 15,
                         ),
+                        if (visitorModel != null && visitorModel!.currentTour != null && visitorModel!.currentTour!.images.isNotEmpty)
+                         Padding(
+                         padding: const EdgeInsets.symmetric(horizontal: 25,vertical: 25),
+                         child: ReviewCard(user: visitorModel, name: visitorModel!.currentTour!.tourTitle!, date: visitorModel!.currentTour!.price!.toString(), review: visitorModel!.currentTour!.description!, urlimg: visitorModel!.currentTour!.images[0]!.replaceAll("localhost", domain)),
+                       ),
+                        SizedBox(
+                          height: 15,
+                        ),
+
+
                         Container(
                           width: MediaQuery.of(context).size.width,
                           padding: EdgeInsets.symmetric(horizontal: 30),
@@ -148,7 +162,7 @@ class _HomeState extends State<Home> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("Find Nearby Tours ",style: TextStyle(fontFamily: 'sf-ui',fontSize: 20,fontWeight: FontWeight.w100),),
-                              InkWell(
+                              GestureDetector(
                                   onTap: (){
 
                                     Navigator.push(context, PageTransition(child: HomeMaps(), type: PageTransitionType.fade));
@@ -199,159 +213,173 @@ class _HomeState extends State<Home> {
                             scrollDirection: Axis.horizontal,
                             itemCount: items.length,
                             itemBuilder: (context, index) {
-                              return Container(
-                                width: 290,
-                                padding: EdgeInsets.symmetric(vertical: 20),
-                                margin: const EdgeInsets.symmetric(horizontal: 12),
+                              return GestureDetector(
+                                onTap: (){
+                                  Navigator.push(context, PageTransition(child: TourDetails(tourModelReceive: items[index],), type: PageTransitionType.rightToLeftWithFade));
+                                },
                                 child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(25),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black12.withOpacity(0.1),
-                                        blurRadius: 10,
-                                        spreadRadius: 0.1,
-                                        offset: Offset(0, 4), // Shadow position
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: MediaQuery.of(context).size.width - 50,
-                                        height: 280,
-                                        margin: EdgeInsets.all(15),
-                                        decoration: BoxDecoration(
-                                            color: Colors.black87,
-                                            borderRadius: BorderRadius.circular(25)),
-                                        child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(25),
-                                            child: Image.network(
-                                              items[index].images[0].replaceAll("localhost", domain),
-                                              fit: BoxFit.cover,
-                                            )),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 25, vertical: 10),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  items[index].tourTitle!,
-                                                  style: const TextStyle(
-                                                      fontSize: 20,
-                                                      fontFamily: 'sf-ui',
-                                                      fontWeight: FontWeight.bold),
-                                                ),
-                                                const Row(
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment.center,
+                                  width: 290,
+                                  padding: EdgeInsets.symmetric(vertical: 20),
+                                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(25),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black12.withOpacity(0.015),
+                                          blurRadius: 15,
+                                          spreadRadius: 2,
+                                          offset: Offset(20, 100), // Shadow position
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width - 50,
+                                          height: 280,
+                                          margin: EdgeInsets.all(15),
+                                          decoration: BoxDecoration(
+                                              color: Colors.black87,
+                                              borderRadius: BorderRadius.circular(25)),
+                                          child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(25),
+                                              child: Image.network(
+                                                items[index].images[0].replaceAll("localhost", domain),
+                                                fit: BoxFit.cover,
+                                                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                                  if (loadingProgress == null) return child;
+                                                  return Center(
+                                                    child: Opacity(
+                                                        opacity: 0.7,
+                                                        child: Image.asset("assets/img/splash.gif")),
+                                                  );
+                                                },
+                                              )
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 25, vertical: 10),
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    items[index].tourTitle!,
+                                                    style: const TextStyle(
+                                                        fontSize: 20,
+                                                        fontFamily: 'sf-ui',
+                                                        fontWeight: FontWeight.bold),
+                                                  ),
+                                                  const Row(
+                                                      mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.star,
+                                                          size: 22,
+                                                          color: Colors.yellow,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(
+                                                          "4.7",
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              fontFamily: 'sf-ui',
+                                                              fontWeight:
+                                                              FontWeight.w400),
+                                                        ),
+                                                      ]),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Row(
                                                     children: [
-                                                      Icon(
-                                                        Icons.star,
-                                                        size: 22,
-                                                        color: Colors.yellow,
+                                                      SvgPicture.asset(
+                                                        "assets/img/locationIcon2.svg",
+                                                        width: 20,
+                                                        height: 20,
+                                                        color: Colors.grey[400],
                                                       ),
                                                       SizedBox(
-                                                        width: 5,
+                                                        width: 8,
+                                                      ),
+                                                      FutureBuilder<String>(
+                                                        future: tourService.getCity(items[index]!.depart!.location!.point!),
+                                                        builder: (context, snapshot) {
+                                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                                            return Text(
+                                                              "Loading...",
+                                                              style: TextStyle(
+                                                                fontSize: 15,
+                                                                fontFamily: 'sf-ui',
+                                                                fontWeight: FontWeight.w400,
+                                                                color: Colors.grey[400],
+                                                              ),
+                                                            );
+                                                          } else if (snapshot.hasError) {
+                                                            return Text(
+                                                              "Error",
+                                                              style: TextStyle(
+                                                                fontSize: 15,
+                                                                fontFamily: 'sf-ui',
+                                                                fontWeight: FontWeight.w400,
+                                                                color: Colors.red[400],
+                                                              ),
+                                                            );
+                                                          } else {
+                                                            return Text(
+                                                              snapshot.data ?? "Unknown",
+                                                              style: TextStyle(
+                                                                fontSize: 15,
+                                                                fontFamily: 'sf-ui',
+                                                                fontWeight: FontWeight.w400,
+                                                                color: Colors.grey[400],
+                                                              ),
+                                                            );
+                                                          }
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      SvgPicture.asset(
+                                                        "assets/img/tourism.svg",
+                                                        width: 25,
+                                                        height: 25,
+                                                        color: Colors.orangeAccent[100],
                                                       ),
                                                       Text(
-                                                        "4.7",
+                                                        items[index].numberOfVisitors !=0 ?"${items[index].numberOfVisitors}+":"0",
                                                         style: TextStyle(
-                                                            fontSize: 20,
+                                                            fontSize: 15,
                                                             fontFamily: 'sf-ui',
-                                                            fontWeight:
-                                                            FontWeight.w400),
+                                                            fontWeight: FontWeight.w400,
+                                                            color: Colors.orangeAccent[100]),
                                                       ),
-                                                    ]),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 8,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    SvgPicture.asset(
-                                                      "assets/img/locationIcon2.svg",
-                                                      width: 20,
-                                                      height: 20,
-                                                      color: Colors.grey[400],
-                                                    ),
-                                                    SizedBox(
-                                                      width: 8,
-                                                    ),
-                                                    FutureBuilder<String>(
-                                                      future: tourService.getCity(items[index]!.depart!.location!.point!),
-                                                      builder: (context, snapshot) {
-                                                        if (snapshot.connectionState == ConnectionState.waiting) {
-                                                          return Text(
-                                                            "Loading...",
-                                                            style: TextStyle(
-                                                              fontSize: 15,
-                                                              fontFamily: 'sf-ui',
-                                                              fontWeight: FontWeight.w400,
-                                                              color: Colors.grey[400],
-                                                            ),
-                                                          );
-                                                        } else if (snapshot.hasError) {
-                                                          return Text(
-                                                            "Error",
-                                                            style: TextStyle(
-                                                              fontSize: 15,
-                                                              fontFamily: 'sf-ui',
-                                                              fontWeight: FontWeight.w400,
-                                                              color: Colors.red[400],
-                                                            ),
-                                                          );
-                                                        } else {
-                                                          return Text(
-                                                            snapshot.data ?? "Unknown",
-                                                            style: TextStyle(
-                                                              fontSize: 15,
-                                                              fontFamily: 'sf-ui',
-                                                              fontWeight: FontWeight.w400,
-                                                              color: Colors.grey[400],
-                                                            ),
-                                                          );
-                                                        }
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    SvgPicture.asset(
-                                                      "assets/img/tourism.svg",
-                                                      width: 25,
-                                                      height: 25,
-                                                      color: Colors.orangeAccent[100],
-                                                    ),
-                                                    Text(
-                                                      items[index].numberOfVisitors !=0 ?"${items[index].numberOfVisitors}+":"0",
-                                                      style: TextStyle(
-                                                          fontSize: 15,
-                                                          fontFamily: 'sf-ui',
-                                                          fontWeight: FontWeight.w400,
-                                                          color: Colors.orangeAccent[100]),
-                                                    ),
-                                                  ],
-                                                )
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      )
-                                    ],
+                                                    ],
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
@@ -406,7 +434,7 @@ class _HomeState extends State<Home> {
                                       color: Colors.black.withOpacity(0.1),
                                       blurRadius: 15,
                                       spreadRadius: 2,
-                                      offset: Offset(0, 4), // Shadow position
+                                      offset: Offset(-5, 200), // Shadow position
                                     ),
                                   ],
                                 ),
@@ -576,12 +604,12 @@ class _HomeState extends State<Home> {
         return Center(child: Text('Failed to load user data: ${state.message}'));
       } else {
         return Scaffold(
-          body: Center(
-            child: ElevatedButton(
-              onPressed: () {
-                BlocProvider.of<LayoutCubit>(context).getUserData();
-              },
-              child: Text("Load User Data"),
+          body: Container(
+            color: Colors.grey,
+            width: double.infinity,
+            height: double.infinity,
+            child: Center(
+              child: Image.asset("assets/img/splash.gif"),
             ),
           ),
         );

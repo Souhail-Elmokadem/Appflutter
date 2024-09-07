@@ -22,7 +22,7 @@ class TourCubit extends Cubit<TourState>{
 
   Future<bool> saveTour(TourModel tour) async {
     print("======================================");
-    //print(tour.toJson());
+    print(tour.toJson());
     print("======================================");
 
     try {
@@ -50,6 +50,7 @@ class TourCubit extends Cubit<TourState>{
       return false;
     }
   }
+
 
   List<File>? listimages;
   List<TourModelReceive> listTours = [];
@@ -142,6 +143,9 @@ class TourCubit extends Cubit<TourState>{
       emit(TourStateFailure());
     }
   }
+
+
+
 
 
 

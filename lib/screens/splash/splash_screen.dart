@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:guidanclyflutter/screens/Auth/signInWithNumber.dart';
 import 'package:guidanclyflutter/screens/Auth/signup.dart';
-import 'package:guidanclyflutter/screens/guide/create_tour_details.dart';
-import 'package:guidanclyflutter/screens/guide/create_tour_cotes.dart';
-import 'package:guidanclyflutter/screens/guide/create_tour_page.dart';
+
 import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/screens/home/home_maps.dart';
 import 'package:guidanclyflutter/screens/onboard/welcome.dart';
 import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
+import 'package:guidanclyflutter/screens/tour/tour_details.dart';
+import 'package:guidanclyflutter/screens/tour/tour_reserve.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:guidanclyflutter/shared/shared_preferences/sharedNatwork.dart';
 import 'package:page_transition/page_transition.dart';

@@ -12,6 +12,7 @@ import 'package:guidanclyflutter/environnement/environnement.prod.dart';
 import 'package:guidanclyflutter/models/location_model.dart';
 import 'package:guidanclyflutter/models/stop_model.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
+import 'package:guidanclyflutter/services/osrm_service.dart';
 import 'package:guidanclyflutter/services/tour_service.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
@@ -20,12 +21,12 @@ class CreateTour extends ChangeNotifier {
   final Completer<GoogleMapController> mapController = Completer();
   LocationData? currentLocation;
   List<LatLng> waypoints = [];
-  TourModel tourModel=  TourModel("",null,"",[],0,[]);
+  TourModel tourModel=  TourModel(0,"",null,"",0,0,[],0,[]);
   Set<Marker> markers = {};
   List<LatLng> polylineCoordinates = [];
   Set<Polyline> polylines = {};
   final TourService tourService = TourService();
-
+  OSRMService osrmService = OSRMService();
   final String orsApiKey = orsmApiKey; // Replace with your ORS API key
 
   CreateTour() {
@@ -50,7 +51,7 @@ class CreateTour extends ChangeNotifier {
 
 
     // Create a custom marker with the title
-    final markerIcon = await createCustomMarker(title,"");
+    final markerIcon = await createCustomMarker(title,"",null);
 
     // Add the marker to the set of markers
     markers.add(
@@ -77,12 +78,12 @@ class CreateTour extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<BitmapDescriptor> createCustomMarker(String title,String url) async {
+  Future<BitmapDescriptor> createCustomMarker(String title,String url,double? size) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
 
     // Adjust these sizes based on your image dimensions and text requirements
-    const double imageSize = 120.0; // Size of the marker image
+     double imageSize = size ?? 120.0; // Size of the marker image
     const double padding = 20.0; // Padding around the text
     const double spacing = 20.0; // Space between text and marker image
 
@@ -116,17 +117,48 @@ class CreateTour extends ChangeNotifier {
   }
 
   // Existing code...
+  Future<int> getStopsForCalculateDuration(List<StopModel> liststop) async {
+    final List<LatLng> stops=[];
+    liststop.forEach((stop) {
+      if (stop.location?.point != null) {
+        stops.add(stop.location!.point!);
+      }
+    });
+    print("------------");
+    int time = await osrmService.calculateWalkingTime(stops);
 
+    //print("++++++++++++");
+    //print(time.toString());
+
+    return time;
+  } // Existing code...
+  Future<int> getStopsForCalculateDistance(List<StopModel> liststop) async {
+    final List<LatLng> stops=[];
+    liststop.forEach((stop) {
+      if (stop.location?.point != null) {
+        stops.add(stop.location!.point!);
+      }
+    });
+    print("------------");
+    int distance = await osrmService.calculateDistance(stops);
+
+    //print("++++++++++++");
+    //print(time.toString());
+
+    return distance;
+  }
   Future<TourModel> saveTour(String tourName, String descriptionarg, double price,List<File> listimage) async {
     if (currentLocation == null || waypoints.isEmpty) {
       print('No current location or waypoints available');
-      return TourModel("",null,"",[],0,[]);
+      return TourModel(0,"",null,"",0,0,[],0,[]);
     }
       print("===========================================");
     tourModel.tourTitle= tourName;
     tourModel.description=descriptionarg;
     tourModel.depart =  StopModel(name: "departTour", location:  LocationModel(LatLng(markers.first.position.latitude, markers.first.position.longitude)));
     tourModel.price=price;
+    tourModel.estimatedTime=await getStopsForCalculateDuration(tourModel.stops!);
+    tourModel.distance=await getStopsForCalculateDistance(tourModel.stops!);
     tourModel.images=listimage;
     return tourModel;
   }

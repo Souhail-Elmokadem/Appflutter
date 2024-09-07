@@ -65,7 +65,7 @@ class TourService {
     } catch (e) {
       print(e.toString());
 
-        cityAndPlace = "Error fetching location";
+        cityAndPlace = "Error";
       return cityAndPlace;
 
 
@@ -91,7 +91,7 @@ class TourService {
     } catch (e) {
       print(e.toString());
 
-        cityAndPlace = "Error fetching location";
+        cityAndPlace = "Error";
       return cityAndPlace;
 
 

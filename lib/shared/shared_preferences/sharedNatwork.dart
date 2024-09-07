@@ -22,15 +22,8 @@ class Sharednetwork {
     return await sharedPref.remove(key);
   }
   static Future<bool> signOut(BuildContext context) async {
-    Navigator.pushReplacement(
-      context,
-      PageTransition(
-        child: const SignWithNumber(),
-        type: PageTransitionType.fade,
-        curve: Curves.bounceIn,
-        duration: const Duration(milliseconds: 600),
-      ),
-    );
+
+
 
     return await sharedPref.clear();
   }

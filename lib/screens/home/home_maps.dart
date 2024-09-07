@@ -7,9 +7,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:guidanclyflutter/models/stop_model.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
-import 'package:guidanclyflutter/screens/guide/create_tour.dart';
+import 'package:guidanclyflutter/screens/guide/create_tour/create_tour.dart';
 import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
+import 'package:guidanclyflutter/screens/tour/tour_details.dart';
 import 'package:guidanclyflutter/screens/widgets/maps_screen.dart';
 import 'package:guidanclyflutter/screens/widgets/read_more_text.dart';
 import 'package:guidanclyflutter/screens/widgets/tour_guide_avatar.dart';
@@ -99,7 +100,7 @@ class _HomeMapsState extends State<HomeMaps> {
           markerId: MarkerId("currentPosition"),
           infoWindow: InfoWindow(title: "Your Location"),
           icon: await createTour.createCustomMarker(
-              "Unnamed Stop", "assets/img/pin.png"),
+              "Unnamed Stop", "assets/img/pin.png",null),
           position:
               LatLng(currentLocation!.latitude!, currentLocation!.longitude!)));
 
@@ -121,7 +122,7 @@ class _HomeMapsState extends State<HomeMaps> {
           position: stopLatLng,
           icon: await createTour.createCustomMarker(
               tour.depart!.name ?? "Unnamed Stop",
-              ""), // Fallback if name is null
+              "",null), // Fallback if name is null
           infoWindow: InfoWindow(
             title: tour.tourTitle ?? "Unnamed Stop", // Fallback if name is null
           ),
@@ -199,7 +200,7 @@ class _HomeMapsState extends State<HomeMaps> {
           children: <Widget>[
             InkWell(
               onTap: (){
-                Navigator.push(context, PageTransition(child: ProfileScreen(), type: PageTransitionType.fade));
+                //Navigator.push(context, PageTransition(child: ProfileScreen(userModel: ,), type: PageTransitionType.fade));
               },
               child: Container(
                 margin: EdgeInsets.fromLTRB(10,35,35,0),
@@ -237,7 +238,7 @@ class _HomeMapsState extends State<HomeMaps> {
                   leading: Icon(Icons.person_pin),
                   title: Text('Profile'),
                   onTap: () {
-                    Navigator.push(context, PageTransition(child: ProfileScreen(), type: PageTransitionType.fade));
+                    //Navigator.push(context, PageTransition(child: ProfileScreen(), type: PageTransitionType.fade));
 
                   },
                 ),
@@ -711,10 +712,11 @@ class _HomeMapsState extends State<HomeMaps> {
                                       width: double
                                           .infinity, // Make the button take full width
                                       child: ElevatedButton(
+
                                         onPressed: () {
                                           // Add your onPressed code here!
-                                          tourService.makePhoneCall(
-                                              selectedTour!.guide!.number!);
+                                          Navigator.push(context, PageTransition(child: TourDetails(tourModelReceive: selectedTour!,), type: PageTransitionType.rightToLeftWithFade));
+
                                         },
                                         style: ElevatedButton.styleFrom(
                                           foregroundColor: Colors.white,
@@ -728,7 +730,7 @@ class _HomeMapsState extends State<HomeMaps> {
                                           ),
                                         ),
                                         child: Text(
-                                          'Call Now',
+                                          'See Tour',
                                           style: TextStyle(
                                             fontSize: 18, // Font size
                                             fontWeight:
