@@ -107,42 +107,42 @@ class TourCubit extends Cubit<TourState>{
       emit(TourStateFailure());
     }
   }
-  void getToursPopular() async {
-    try {
-      emit(TourStateLoading());
-
-      var response = await client.get(
-        Uri.parse('$apiurl/api/tours/getAllToursPage'),
-      );
-
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-
-        if (data['items'] != null && data['items'] is List) {
-          var toursData = data['items'] as List<dynamic>;
-
-          if (toursData.isNotEmpty) {
-            listToursPopular = toursData.map((tour) => TourModelReceive.fromJson(tour)).toList();
-            emit(TourStateSuccess());
-          } else {
-            // Handle the case where the list is empty
-            print('No tours found.');
-            listToursPopular = [];
-            emit(TourStateFailure()); // You might want to define a new state for empty results
-          }
-        } else {
-          print('Invalid data format: ${data['items']}');
-          emit(TourStateFailure());
-        }
-      } else {
-        print('Failed to load tours: ${response.body}');
-        emit(TourStateFailure());
-      }
-    } catch (e) {
-      print('Error saving tour: $e');
-      emit(TourStateFailure());
-    }
-  }
+  // void getToursPopular() async {
+  //   try {
+  //     emit(TourStateLoading());
+  //
+  //     var response = await client.get(
+  //       Uri.parse('$apiurl/api/tours/getAllToursPage'),
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       var data = jsonDecode(response.body);
+  //
+  //       if (data['items'] != null && data['items'] is List) {
+  //         var toursData = data['items'] as List<dynamic>;
+  //
+  //         if (toursData.isNotEmpty) {
+  //           listToursPopular = toursData.map((tour) => TourModelReceive.fromJson(tour)).toList();
+  //           emit(TourStateSuccess());
+  //         } else {
+  //           // Handle the case where the list is empty
+  //           print('No tours found.');
+  //           listToursPopular = [];
+  //           emit(TourStateFailure()); // You might want to define a new state for empty results
+  //         }
+  //       } else {
+  //         print('Invalid data format: ${data['items']}');
+  //         emit(TourStateFailure());
+  //       }
+  //     } else {
+  //       print('Failed to load tours: ${response.body}');
+  //       emit(TourStateFailure());
+  //     }
+  //   } catch (e) {
+  //     print('Error saving tour: $e');
+  //     emit(TourStateFailure());
+  //   }
+  // }
 
 
 

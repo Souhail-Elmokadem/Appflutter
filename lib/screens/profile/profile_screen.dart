@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart' as geo;
+import 'package:guidanclyflutter/cubit/layout/layout_cubit.dart';
+import 'package:guidanclyflutter/cubit/layout/layout_state.dart';
 import 'package:guidanclyflutter/environnement/environnement.prod.dart';
+import 'package:guidanclyflutter/models/guide_model.dart';
 import 'package:guidanclyflutter/models/user_model.dart';
 import 'package:guidanclyflutter/models/visitor_model.dart';
+import 'package:guidanclyflutter/screens/guide/dashboard/dashboard.dart';
+import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/screens/profile/edit_profile_screen.dart';
 import 'package:guidanclyflutter/screens/tour/tour_reserve.dart';
 import 'package:guidanclyflutter/screens/widgets/bottom_navigation_bar.dart';
@@ -13,6 +19,7 @@ import 'package:guidanclyflutter/shared/shared_preferences/sharedNatwork.dart';
 import 'package:guidanclyflutter/shared/shared_preferences/shared_token.dart';
 import 'package:location/location.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:restart_app/restart_app.dart';
 
 class ProfileScreen extends StatefulWidget {
   VisitorModel? userModel;
@@ -63,9 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
   }
-  void _logout(BuildContext context) {
-    RestartWidget.restartApp(context);
-  }
+
 
   @override
   void initState() {
@@ -349,7 +354,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onPressed: () {
                             TokenManager.clearTokens();
                             Sharednetwork.signOut(context);
-                            _logout(context);
+                            Navigator.popUntil(
+                              context,
+                              ModalRoute.withName('/'),
+                            );
+                            RestartWidget.restartApp(context);
 
                           },
                           child: Text("Disconnect",

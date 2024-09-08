@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guidanclyflutter/cubit/Auth/auth_cubit.dart';
 import 'package:guidanclyflutter/cubit/Auth/auth_state.dart';
+import 'package:guidanclyflutter/cubit/layout/layout_cubit.dart';
 import 'package:guidanclyflutter/screens/Auth/SignIn.dart';
 import 'package:guidanclyflutter/screens/Auth/Widget_Input_number.dart';
 import 'package:guidanclyflutter/screens/Auth/signup.dart';
+import 'package:guidanclyflutter/screens/guide/dashboard/dashboard.dart';
 import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:page_transition/page_transition.dart';
@@ -100,21 +102,35 @@ class _SignInState extends State<SignWithNumber> {
     return Scaffold(
       body: SingleChildScrollView(
         child: BlocConsumer<Authcubit, AuthState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             if (state is SignInLoading) {
               _showLoadingDialog(context);
             } else if (state is SignInSuccess) {
               _showSnackBar(context, "Sign In Successful", mainColor);
-              Navigator.pushAndRemoveUntil(
-                context,
-                PageTransition(
-                  child:  Home(),
-                  type: PageTransitionType.fade,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeIn,
-                ),
-                ModalRoute.withName('/'),
-              );
+              await BlocProvider.of<LayoutCubit>(context).getUserData();//here layoutcubit
+              if(state.role=="GUIDE"){
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  PageTransition(
+                    child:  Dashboard(),
+                    type: PageTransitionType.fade,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeIn,
+                  ),
+                  ModalRoute.withName('/'),
+                );
+              }else if(state.role == "VISITOR"){
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  PageTransition(
+                    child:  Home(),
+                    type: PageTransitionType.fade,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeIn,
+                  ),
+                  ModalRoute.withName('/'),
+                );
+              }
 
             } else if (state is SignInFailure) {
               Navigator.of(context).pop();

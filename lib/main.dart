@@ -21,6 +21,7 @@ import 'package:guidanclyflutter/shared/theme/theme.dart';
 import 'package:provider/provider.dart';
 
 void main()async{
+
   WidgetsFlutterBinding.ensureInitialized();
   await Sharednetwork.cashInitializer();
   accessToken = Sharednetwork.getDataString(key: "accessToken");
@@ -41,8 +42,8 @@ class _GuidanclyState extends State<Guidancly> {
     return  MultiBlocProvider(
       providers: [
         BlocProvider(create: (context)=> Authcubit()),
-        BlocProvider(create: (context) => LayoutCubit()..getUserData()),
-        BlocProvider(create: (context)=> TourCubit()..getTours()..getToursPopular()),
+        BlocProvider(create: (context)  => LayoutCubit()..getUserData()),
+        BlocProvider(create: (context)=> TourCubit()..getTours()),
         BlocProvider(create: (context)=> VisitorCubit()),
         ChangeNotifierProvider<CreateTour>(
           create: (_) => CreateTour(),

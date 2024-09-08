@@ -9,6 +9,7 @@ import 'package:guidanclyflutter/environnement/environnement.prod.dart';
 import 'package:guidanclyflutter/shared/shared_preferences/sharedNatwork.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class Authcubit extends Cubit<AuthState>{
   Authcubit() : super(InitialAuth());
@@ -31,7 +32,7 @@ class Authcubit extends Cubit<AuthState>{
 
       dynamic data = jsonDecode(response.body);
       messageError = data['message'];
-      await Future.delayed(Duration(seconds: 2));
+
 
       String accessToken = data['access-token'];
       String refreshToken = data['refresh-token'];
@@ -41,7 +42,9 @@ class Authcubit extends Cubit<AuthState>{
         Sharednetwork.insertDataString(key: "accessToken", value: accessToken);
         Sharednetwork.insertDataString(key: "refreshToken", value: refreshToken);
         print("Login Successful");
-        emit(SignInSuccess());
+        String role = JwtDecoder.decode(accessToken)['scope'].toString();
+
+        emit(SignInSuccess( role: role));
       }else{
 
         emit(SignInFailure(message: data['message']));
