@@ -108,28 +108,39 @@ class _SignInState extends State<SignWithNumber> {
             } else if (state is SignInSuccess) {
               _showSnackBar(context, "Sign In Successful", mainColor);
               await BlocProvider.of<LayoutCubit>(context).getUserData();//here layoutcubit
+              final userdata = await BlocProvider.of<LayoutCubit>(context).user;
               if(state.role=="GUIDE"){
+    if (userdata != null) {
                 Navigator.pushAndRemoveUntil(
                   context,
                   PageTransition(
-                    child:  Dashboard(),
+                    child:  Dashboard(guideModel: userdata,),
                     type: PageTransitionType.fade,
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.easeIn,
                   ),
                   ModalRoute.withName('/'),
-                );
+                );}else{
+      print("Guide data is null");
+      _showErrorDialog(context, "Guide data is not available.");
+    }
               }else if(state.role == "VISITOR"){
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  PageTransition(
-                    child:  Home(),
-                    type: PageTransitionType.fade,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeIn,
-                  ),
-                  ModalRoute.withName('/'),
-                );
+                if (userdata != null) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    PageTransition(
+                      child: Home(visitorModel: userdata),
+                      type: PageTransitionType.fade,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeIn,
+                    ),
+                    ModalRoute.withName('/'),
+                  );
+                } else {
+                  // Handle the case where visitor data is null (perhaps show an error or a default page)
+                  print("Visitor data is null");
+                  _showErrorDialog(context, "Visitor data is not available.");
+                }
               }
 
             } else if (state is SignInFailure) {

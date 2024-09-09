@@ -43,6 +43,7 @@ dependencies:
   location: ^7.0.0
   restart_app: 1.2.1
   geocoding: ^3.0.0
+  animated_segmented_tab_control: ^2.0.0
   flutter_typeahead: ^5.2.0
   flutter_google_maps_webservices: ^1.1.1
   google_places_flutter: ^2.0.9

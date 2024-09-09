@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Navigator.pushAndRemoveUntil(
                 context,
                 PageTransition(
-                    child: accessToken!=null && accessToken!=""? Dashboard():const SignWithNumber(), //Changed
+                    child: accessToken!=null && accessToken!=""? Dashboard(guideModel: state.userdetail,):const SignWithNumber(), //Changed
                     type: PageTransitionType.fade,
                     curve: Curves.bounceIn,
                     duration: const Duration(milliseconds: 600)),
@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Navigator.pushAndRemoveUntil(
                 context,
                 PageTransition(
-                    child: accessToken!=null && accessToken!=""? Home():const SignWithNumber(), //Changed
+                    child: accessToken!=null && accessToken!=""? Home(visitorModel: state.userdetail,):const SignWithNumber(), //Changed
                     type: PageTransitionType.fade,
                     curve: Curves.bounceIn,
                     duration: const Duration(milliseconds: 600)),

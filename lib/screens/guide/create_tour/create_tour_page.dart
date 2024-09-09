@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_state.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
+import 'package:guidanclyflutter/screens/guide/dashboard/dashboard.dart';
 import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/services/message_dialog_service.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
@@ -85,7 +86,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
           Navigator.pushAndRemoveUntil(
               context,
               PageTransition(
-                child:  Home(),
+                child:  Dashboard(),
                 type: PageTransitionType.fade,
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeIn,

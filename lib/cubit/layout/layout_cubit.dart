@@ -23,6 +23,7 @@ final http.Client client = InterceptedClient.build(
 class LayoutCubit extends Cubit<LayoutState> {
   LayoutCubit() : super(LayoutInitializer());
   UserModel? userModel;
+  dynamic? user;
   Future<void> getUserData() async {
     try {
       emit(LayoutLoading());
@@ -30,10 +31,13 @@ class LayoutCubit extends Cubit<LayoutState> {
       if (res.statusCode == 200) {
         dynamic data = jsonDecode(res.body);
         userModel = UserModel.fromJson(data['data']);
+
         if(userModel!.role.toString() == "GUIDE"){
+          user = GuideModel.fromJson(data['data']);
           emit(LayoutSuccess<GuideModel>(UserModel.fromJson(data['data']),
               GuideModel.fromJson(data['data'])));
         }else if(userModel!.role.toString() == "VISITOR"){
+          user = VisitorModel.fromJson(data['data']);
           emit(LayoutSuccess<VisitorModel>(UserModel.fromJson(data['data']),
               VisitorModel.fromJson(data['data'])));
         }

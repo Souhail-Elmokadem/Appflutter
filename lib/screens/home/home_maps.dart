@@ -247,7 +247,7 @@ class _HomeMapsState extends State<HomeMaps> {
                   leading: Icon(Icons.home),
                   title: Text('Home'),
                   onTap: () {
-                    Navigator.push(context, PageTransition(child: Home(), type: PageTransitionType.fade));
+                    Navigator.pop(context);
 
                   },
                 ),

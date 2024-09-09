@@ -29,6 +29,10 @@ class TourModel {
     'images': images?.map((image) => base64Encode(image.readAsBytesSync())).toList(), // Encode images to Base64
   };
 
+  TourModel setDescription(String desc) {
+    description = desc;
+    return this;
+  }
   static TourModel fromJson(Map<String, dynamic> json) {
     return TourModel(
       json['id'],
