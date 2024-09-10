@@ -113,17 +113,13 @@ class _CreateTourPageState extends State<CreateTourPage> {
                     onPressed: () async {
                       String tourName = _tourNameController.text.trim();
                       if (tourName.isNotEmpty) {
-
                         final arg = (ModalRoute.of(context)?.settings.arguments ?? <String,dynamic> {}) as Map;
                         TourModel tourModel = await Provider.of<CreateTour>(context, listen: false).saveTour(tourName,arg['about'],double.parse(arg['price']),arg['images']);
                         await BlocProvider.of<TourCubit>(context).saveTour(tourModel);
                       } else {
-
                         print('Tour name cannot be empty');
-
                       }
                     },
-
                   child: Text('Save'),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,

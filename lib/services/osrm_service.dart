@@ -31,7 +31,7 @@ class OSRMService extends ChangeNotifier{
     }
   }
 
-  Future<void> generateRoute(List<LatLng> waypoints,Color? color) async {
+  Future<void> generateRoute(List<LatLng> waypoints,Color? color,int width) async {
 
     if (waypoints.isEmpty) return;
     List<LatLng> polylineCoordinates=[];
@@ -71,7 +71,7 @@ class OSRMService extends ChangeNotifier{
         polylines.add(Polyline(
           polylineId: PolylineId('route'),
           points: polylineCoordinates,
-          width: 15,
+          width: width,
           color: color??Colors.blue,
         ));
         _polylines = polylines; // Update the stored polylines

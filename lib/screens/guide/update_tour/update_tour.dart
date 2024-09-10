@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:guidanclyflutter/cubit/guide/guide_cubit.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
 import 'package:guidanclyflutter/screens/guide/update_tour/update_tab_one.dart';
@@ -16,9 +21,13 @@ class UpdateTour extends StatefulWidget {
 }
 
 class _UpdateTourState extends State<UpdateTour>  with SingleTickerProviderStateMixin{
+  final Completer<GoogleMapController> _controller =
+  Completer<GoogleMapController>();
 
   TourModel? tourModel;
   late TabController tabController;
+
+
   @override
   void initState() {
     // TODO: implement initState
@@ -27,12 +36,9 @@ class _UpdateTourState extends State<UpdateTour>  with SingleTickerProviderState
      tourModel = TourModel(widget.tourModelReceive.id, widget.tourModelReceive.tourTitle, widget.tourModelReceive.depart, widget.tourModelReceive.description, widget.tourModelReceive.estimatedTime, widget.tourModelReceive.distance, widget.tourModelReceive.stops, widget.tourModelReceive.price, null);
 
   }
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    tabController.dispose();
-  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return  DefaultTabController(
@@ -65,7 +71,10 @@ class _UpdateTourState extends State<UpdateTour>  with SingleTickerProviderState
               child: InkWell(
                 borderRadius: BorderRadius.circular(30),
                 onTap: (){
-                  Navigator.pop(context);
+
+                  Navigator.of(context).pop();
+                  context.read<GuideCubit>().getToursByGuide(); // Refresh data if needed
+// Go back without reloading the Dashboard
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(left: 5),
@@ -73,6 +82,25 @@ class _UpdateTourState extends State<UpdateTour>  with SingleTickerProviderState
                 ),
               ),
             ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: ElevatedButton(
+                onPressed: () async {
+                  print(tourModel!.id);
+                },
+                child: Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blueAccent,
+                  elevation: 0,
+
+
+                  textStyle: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ],
         ),
         body: Container(
           color: mainColor,
@@ -81,7 +109,7 @@ class _UpdateTourState extends State<UpdateTour>  with SingleTickerProviderState
             children: [
               UpdateTabOne(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel ,),
               UpdateTabTwo(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel ,),
-              UpdateTabThree(tabController: tabController,tourModelReceive:widget.tourModelReceive)
+              UpdateTabThree(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel,controller: _controller )
             ],
           ),
         ),

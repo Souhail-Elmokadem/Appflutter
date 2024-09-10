@@ -37,7 +37,6 @@ class CreateTour extends ChangeNotifier {
     Location location = Location();
     currentLocation = await location.getLocation();
     notifyListeners();
-
   }
 
   Future<void> addWaypoint(LatLng point, String title) async {
@@ -167,6 +166,9 @@ class CreateTour extends ChangeNotifier {
     return markers;
   }
 
+  void setWaypoints(Set<Marker> mrks) {
+    markers=mrks;
+  }
   Set<Polyline> getPolylines() {
     return polylines;
   }

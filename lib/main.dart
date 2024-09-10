@@ -11,6 +11,7 @@ import 'package:guidanclyflutter/screens/guide/create_tour/create_tour.dart';
 import 'package:guidanclyflutter/screens/guide/create_tour/create_tour_cotes.dart';
 import 'package:guidanclyflutter/screens/guide/create_tour/create_tour_details.dart';
 import 'package:guidanclyflutter/screens/guide/create_tour/create_tour_page.dart';
+import 'package:guidanclyflutter/screens/guide/dashboard/dashboard.dart';
 
 import 'package:guidanclyflutter/screens/home/home.dart';
 import 'package:guidanclyflutter/screens/onboard/welcome.dart';
@@ -63,6 +64,7 @@ class _GuidanclyState extends State<Guidancly> {
           '/createTour':(context) =>  CreateTourPage(),
           '/createTourCotes':(context) => CreateTourCotes(),
           '/createTourdetails':(context) => CreateTourDetails(),
+          '/dashboard':(context) => Dashboard(),
 
         },
       ),

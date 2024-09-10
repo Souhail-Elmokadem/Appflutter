@@ -18,6 +18,22 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch tours data when initializing the screen
+    context.read<GuideCubit>().getToursByGuide();
+  }
+
+  @override
+  void didUpdateWidget(Dashboard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.guideModel != oldWidget.guideModel) {
+      // Reset or update state when guideModel changes
+      context.read<GuideCubit>().getToursByGuide();
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +78,8 @@ class _DashboardState extends State<Dashboard> {
             BlocConsumer<GuideCubit, GuideState>(
               listener: (context, state) {},
               builder: (context, state) {
+
+
                 if (state is GuideStateSuccess) {
                   return Container(
                     margin: const EdgeInsets.only(top: 200),
@@ -86,7 +104,15 @@ class _DashboardState extends State<Dashboard> {
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: () {
-                            Navigator.push(context, PageTransition(child: UpdateTour(tourModelReceive: state.tours[index]), type: PageTransitionType.rightToLeftWithFade,curve: Curves.easeOut));
+                            Navigator.push(
+                              context,
+                              PageTransition(
+                                child: UpdateTour(tourModelReceive: state.tours[index]),
+                                type: PageTransitionType.rightToLeftWithFade,
+                                curve: Curves.easeOut,
+                              ),
+                            );
+
                           },
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),

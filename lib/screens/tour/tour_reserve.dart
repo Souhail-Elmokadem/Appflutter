@@ -119,7 +119,7 @@ class _TourReserveState extends State<TourReserve> {
     LatLng firstStopLatLng = _stopMarkers.first.position;
     List<LatLng> waypoints = [_currentLatLng!, firstStopLatLng];
 
-    await _osrmService.generateRoute(waypoints,Colors.orangeAccent);
+    await _osrmService.generateRoute(waypoints,Colors.orangeAccent,15);
 
     setState(() {
       _polylines = _osrmService.polylines;
