@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_state.dart';
+import 'package:guidanclyflutter/models/guide_model.dart';
 import 'package:guidanclyflutter/services/message_dialog_service.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 
 class CreateTourDetails extends StatefulWidget {
-  const CreateTourDetails({super.key});
+
+  GuideModel? guideModel;
+  CreateTourDetails({super.key,this.guideModel});
 
   @override
   State<CreateTourDetails> createState() => _CreateTourDetailsState();
@@ -37,6 +40,9 @@ class _CreateTourDetailsState extends State<CreateTourDetails> {
       resizeToAvoidBottomInset:
       false, // Prevents resizing when the keyboard appears
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: mainColor, // Set the color you want for the back icon
+        ),
         title: const Text("Creation of tour ",style: TextStyle(color: Colors.blue,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
         backgroundColor: Colors.white,
         actions: [
@@ -51,7 +57,8 @@ class _CreateTourDetailsState extends State<CreateTourDetails> {
 
                 }
                 else{
-                  Navigator.pushNamed(context,'/createTourCotes',arguments: {'about': textEditingDescription.text,'images':BlocProvider.of<TourCubit>(context).listimages} );
+
+                  Navigator.pushNamed(context,'/createTourCotes',arguments: {'about': textEditingDescription.text,'images':BlocProvider.of<TourCubit>(context).listimages,'guide':widget.guideModel != null?widget.guideModel:GuideModel("", "", "", "", "", DateTime.now(), "")} );
 
                 }
               },

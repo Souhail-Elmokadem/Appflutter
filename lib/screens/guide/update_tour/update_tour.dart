@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:guidanclyflutter/cubit/guide/guide_cubit.dart';
+import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
+import 'package:guidanclyflutter/cubit/tour/tour_state.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
 import 'package:guidanclyflutter/screens/guide/update_tour/update_tab_one.dart';
@@ -38,81 +40,92 @@ class _UpdateTourState extends State<UpdateTour>  with SingleTickerProviderState
   }
 
 
+  void refreshDashboard(){
+    print("refresh+++++++++++++++++++++++++++++++");
+    context.read<GuideCubit>().getToursByGuide(); // Refresh data if needed
+
+  }
 
   @override
   Widget build(BuildContext context) {
     return  DefaultTabController(
       length: 3, // Number of tabs
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          backgroundColor: mainColor,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          bottom: TabBar(
-            indicatorColor: mainColor,
-            dividerColor: Colors.transparent,
-            controller: tabController,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            tabs: [
-              Tab(text: "About Tour"),
-              Tab(text: "Price"),
-              Tab(text: "Stops"),
-            ],
-          ),
-          title: Text('update tour',style: TextStyle(color: Colors.white,fontSize: 22,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
-          centerTitle: true,
-          automaticallyImplyLeading: false,
-          // This removes the back button
-          leading:
-            Container(
-              margin: EdgeInsets.all(5),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30),
-                onTap: (){
+      child: BlocConsumer<TourCubit,TourState>(
+         listener: (context,state){},
+        builder: (context,state){
+           return Scaffold(
+             resizeToAvoidBottomInset: true,
+             appBar: AppBar(
+               backgroundColor: mainColor,
+               elevation: 0,
+               shadowColor: Colors.transparent,
+               bottom: TabBar(
+                 indicatorColor: mainColor,
+                 dividerColor: Colors.transparent,
+                 controller: tabController,
+                 labelColor: Colors.white,
+                 unselectedLabelColor: Colors.white70,
+                 tabs: [
+                   Tab(text: "About Tour"),
+                   Tab(text: "Price"),
+                   Tab(text: "Stops"),
+                 ],
+               ),
+               title: Text('update tour',style: TextStyle(color: Colors.white,fontSize: 22,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
+               centerTitle: true,
+               automaticallyImplyLeading: false,
+               // This removes the back button
+               leading:
+               Container(
+                 margin: EdgeInsets.all(5),
+                 child: InkWell(
+                   borderRadius: BorderRadius.circular(30),
+                   onTap: (){
 
-                  Navigator.of(context).pop();
-                  context.read<GuideCubit>().getToursByGuide(); // Refresh data if needed
-// Go back without reloading the Dashboard
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Icon(Icons.arrow_back_ios,size: 18,color: Colors.white,),
-                ),
-              ),
-            ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: ElevatedButton(
-                onPressed: () async {
-                  print(tourModel!.id);
-                },
-                child: Text('Save'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.blueAccent,
-                  elevation: 0,
+                     Navigator.of(context).pop();
+                     refreshDashboard();                     // Go back without reloading the Dashboard
+                   },
+                   child: Padding(
+                     padding: const EdgeInsets.only(left: 5),
+                     child: Icon(Icons.arrow_back_ios,size: 18,color: Colors.white,),
+                   ),
+                 ),
+               ),
+               actions: [
+                 Padding(
+                   padding: const EdgeInsets.only(right: 10),
+                   child: ElevatedButton(
+                     onPressed: () async {
+                          BlocProvider.of<TourCubit>(context).update(tourModel!);
+                          Navigator.pop(context);
+                          setState(() {
 
-
-                  textStyle: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-          ],
-        ),
-        body: Container(
-          color: mainColor,
-          child: TabBarView(
-            controller: tabController,
-            children: [
-              UpdateTabOne(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel ,),
-              UpdateTabTwo(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel ,),
-              UpdateTabThree(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel,controller: _controller )
-            ],
-          ),
-        ),
+                          });
+                     },
+                     child: Text('Save'),
+                     style: ElevatedButton.styleFrom(
+                       foregroundColor: Colors.white,
+                       backgroundColor: Colors.blueAccent,
+                       elevation: 0,
+                       textStyle: TextStyle(fontSize: 16),
+                     ),
+                   ),
+                 ),
+               ],
+             ),
+             body: Container(
+               color: mainColor,
+               child: TabBarView(
+                 controller: tabController,
+                 children: [
+                   UpdateTabOne(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel ,refresh: refreshDashboard,),
+                   UpdateTabTwo(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel ,),
+                   UpdateTabThree(tabController: tabController,tourModelReceive:widget.tourModelReceive,tourModel: tourModel,controller: _controller )
+                 ],
+               ),
+             ),
+           );
+        },
       ),
     );
 

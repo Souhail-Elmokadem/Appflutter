@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_state.dart';
+import 'package:guidanclyflutter/models/guide_model.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/screens/guide/dashboard/dashboard.dart';
 import 'package:guidanclyflutter/screens/home/home.dart';
@@ -67,6 +68,11 @@ class _CreateTourPageState extends State<CreateTourPage> {
   @override
   void initState() {
     super.initState();
+
+    Provider.of<CreateTour>(context, listen: false).waypoints.clear();
+    // Clear previous state
+    Provider.of<CreateTour>(context, listen: false).clearMarkersAndPolylines();
+    // Initialize current location
     Provider.of<CreateTour>(context, listen: false).initializeCurrentLocation();
     _tourfocus.addListener(() {
       setState(() {
@@ -74,6 +80,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
       });
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,15 +90,7 @@ class _CreateTourPageState extends State<CreateTourPage> {
           messageDialogService.showLoadingDialog(context);
         }else if(state is TourStateSuccess){
           _showSnackBar(context, "Tour ${_tourNameController.text} Created", mainColor);
-          Navigator.pushAndRemoveUntil(
-              context,
-              PageTransition(
-                child:  Dashboard(),
-                type: PageTransitionType.fade,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeIn,
-              ),
-              ModalRoute.withName('/'));
+          createTour.clearMarkersAndPolylines();
 
         }else if (state is TourStateFailure){
           Navigator.of(context).pop();
@@ -110,16 +109,36 @@ class _CreateTourPageState extends State<CreateTourPage> {
               Padding(
                 padding: const EdgeInsets.only(right: 10),
                 child: ElevatedButton(
-                    onPressed: () async {
-                      String tourName = _tourNameController.text.trim();
-                      if (tourName.isNotEmpty) {
-                        final arg = (ModalRoute.of(context)?.settings.arguments ?? <String,dynamic> {}) as Map;
-                        TourModel tourModel = await Provider.of<CreateTour>(context, listen: false).saveTour(tourName,arg['about'],double.parse(arg['price']),arg['images']);
-                        await BlocProvider.of<TourCubit>(context).saveTour(tourModel);
-                      } else {
-                        print('Tour name cannot be empty');
-                      }
-                    },
+                  onPressed: () async {
+                    String tourName = _tourNameController.text.trim();
+                    if (tourName.isNotEmpty) {
+                      final arg = (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{}) as Map;
+
+                      // Save the tour
+                      TourModel tourModel = await Provider.of<CreateTour>(context, listen: false).saveTour(tourName, arg['about'], double.parse(arg['price']), arg['images']);
+
+                      // After saving, navigate back or to the dashboard
+                      await BlocProvider.of<TourCubit>(context).saveTour(tourModel);
+
+
+                      // Clear markers and polylines
+                      Provider.of<CreateTour>(context, listen: false).clearMarkersAndPolylines();
+
+                      // Navigate to the dashboard and remove all previous pages
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => Dashboard(guideModel: (arg['guide'] as GuideModel))),
+                            (Route<dynamic> route) => false,
+                      ).then((_){
+                        createTour.startNewTour();
+                        createTour.markers.clear();
+                        createTour.clearMarkersAndPolylines();
+                        createTour.dispose();
+                      });
+                    } else {
+                      print('Tour name cannot be empty');
+                    }
+                  }
+                  ,
                   child: Text('Save'),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
@@ -189,6 +208,9 @@ class _CreateTourPageState extends State<CreateTourPage> {
                               zoom: 14,
                             ),
                             onMapCreated: (controller) {
+                              if (!createTour.mapController.isCompleted) {
+                                createTour.mapController.complete(controller);
+                              }
                               _controller.complete(controller);
                               createTour.mapController.complete(controller);
                             },

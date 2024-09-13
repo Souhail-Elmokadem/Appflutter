@@ -5,7 +5,9 @@ import 'package:guidanclyflutter/cubit/guide/guide_cubit.dart';
 import 'package:guidanclyflutter/cubit/guide/guide_state.dart';
 import 'package:guidanclyflutter/environnement/environnement.prod.dart';
 import 'package:guidanclyflutter/models/guide_model.dart';
+import 'package:guidanclyflutter/screens/guide/create_tour/create_tour_details.dart';
 import 'package:guidanclyflutter/screens/guide/update_tour/update_tour.dart';
+import 'package:guidanclyflutter/screens/profile/profile_screen_guide.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -18,6 +20,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  final GlobalKey<ScaffoldState> _key = GlobalKey(); // Create a key
 
   @override
   void initState() {
@@ -37,6 +40,62 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
+      drawer: Drawer(
+        child: Column(
+          children: <Widget>[
+            InkWell(
+              onTap: (){
+                //Navigator.push(context, PageTransition(child: ProfileScreen(userModel: ,), type: PageTransitionType.fade));
+              },
+              child: Container(
+                margin: EdgeInsets.fromLTRB(10,35,35,0),
+                child: Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                      child: CircleAvatar(
+                        radius: 25,
+                        backgroundImage: NetworkImage(widget.guideModel?.avatar! != null ? widget.guideModel!.avatar!.replaceAll("localhost", domain) : ""),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(0, 0, 60, 0),
+                      child: Text(
+                        widget.guideModel!.firstName!,
+                        style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    Icon(Icons.keyboard_arrow_right_sharp)
+                  ],
+                ),
+              ),
+            ),
+
+            // Divider(height: 1, color: Colors.black12),
+            ListView(
+              padding: EdgeInsets.only(top: 30),
+              shrinkWrap: true,
+              children: <Widget>[
+                ListTile(
+                  leading: Icon(Icons.add_location_alt_outlined),
+                  title: Text('Create Tour',style: TextStyle(fontWeight: FontWeight.w400,fontFamily: 'sf-ui',),),
+                  onTap: () {
+                     Navigator.push(context, PageTransition(child: CreateTourDetails(guideModel: widget.guideModel != null?widget.guideModel:GuideModel("", "", "", "", "", DateTime.now(), ""),), type: PageTransitionType.fade,curve: Curves.easeInOut,duration: Duration(milliseconds: 600)));
+                  },
+                ),
+              ],
+            ),
+            Spacer(),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings'),
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
       body: Container(
         child: Stack(
           children: [
@@ -51,16 +110,26 @@ class _DashboardState extends State<Dashboard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.sort,color: Colors.white,size: 40,),
+                      IconButton(
+                        onPressed: (){
+                          _key.currentState!.openDrawer();
+                        },
+                      icon:const Icon(Icons.sort,color: Colors.white,size: 40) ,
+                      ),
                       Text("guidancly",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontFamily: 'sf-ui',fontSize: 22),),
-                      Container(
-                        padding: EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(widget.guideModel?.avatar! != null ? widget.guideModel!.avatar!.replaceAll("localhost", domain) : ""),
+                      InkWell(
+                        onTap: (){
+                          Navigator.push(context, PageTransition(child: ProfileScreenGuide(guideModel: widget.guideModel), type: PageTransitionType.rightToLeftJoined,childCurrent: Dashboard(guideModel: widget.guideModel,), curve: Curves.easeOut,duration: Duration(milliseconds: 400)));
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: CircleAvatar(
+                            backgroundImage: NetworkImage(widget.guideModel?.avatar! != null ? widget.guideModel!.avatar!.replaceAll("localhost", domain) : ""),
+                          ),
                         ),
                       )
                     ],
@@ -181,6 +250,7 @@ class _DashboardState extends State<Dashboard> {
           ],
         ),
       ),
+
     );
   }
   String _format(DateTime date){

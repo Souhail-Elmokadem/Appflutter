@@ -21,15 +21,15 @@ import 'package:location/location.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:restart_app/restart_app.dart';
 
-class ProfileScreen extends StatefulWidget {
-  VisitorModel? userModel;
-  ProfileScreen({super.key,required this.userModel});
+class ProfileScreenGuide extends StatefulWidget {
+  GuideModel? guideModel;
+  ProfileScreenGuide({super.key,required this.guideModel});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreenGuide> createState() => _ProfileScreenGuideState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenGuideState extends State<ProfileScreenGuide> {
   int _selectedIndex = 1;
 
   void _onItemTapped(int index) {
@@ -39,37 +39,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
 
-    Future<String> getCity() async {
+  Future<String> getCity() async {
     Location location = Location();
     LocationData locationData = await location.getLocation();
 
-      String cityAndPlace="";
-      try {
-        List<geo.Placemark> placemarks =
-        await geo.placemarkFromCoordinates(locationData.latitude!, locationData.longitude!);
+    String cityAndPlace="";
+    try {
+      List<geo.Placemark> placemarks =
+      await geo.placemarkFromCoordinates(locationData.latitude!, locationData.longitude!);
 
-        if (placemarks.isNotEmpty) {
+      if (placemarks.isNotEmpty) {
 
-          cityAndPlace =
-          "${placemarks.first.locality}";
-          return cityAndPlace;
+        cityAndPlace =
+        "${placemarks.first.locality}";
+        return cityAndPlace;
 
-        } else {
+      } else {
 
-          cityAndPlace = "Unknown location";
-          return cityAndPlace;
-        }
-      } catch (e) {
-        print(e.toString());
-        cityAndPlace = "Error fetching location";
+        cityAndPlace = "Unknown location";
         return cityAndPlace;
       }
+    } catch (e) {
+      print(e.toString());
+      cityAndPlace = "Error fetching location";
+      return cityAndPlace;
+    }
   }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    print(widget.userModel!.currentTour);
+    //print(widget.guideModel!.currentTour);
   }
   @override
   Widget build(BuildContext context)  {
@@ -133,15 +134,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundImage: widget.userModel?.avatar != null
-                          ? NetworkImage(widget.userModel!.avatar!.replaceAll("localhost", domain))
+                      backgroundImage: widget.guideModel?.avatar != null
+                          ? NetworkImage(widget.guideModel!.avatar!.replaceAll("localhost", domain))
                           : AssetImage("assets/img/person.png") as ImageProvider,
                     )
                     ,
                     SizedBox(height: 10),
 
                     Text(
-                      widget.userModel?.firstName ?? "No data",
+                      widget.guideModel?.firstName ?? "No data",
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 5),
@@ -207,17 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: Column(
                         children: [
-                          const Text("Current Tour",
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          SizedBox(height: 10,),
-                          if (widget.userModel != null && widget.userModel!.currentTour != null && widget.userModel!.currentTour!.images.isNotEmpty)
-                          ReviewCard(
-                            user: widget.userModel,
-                            name: widget.userModel!.currentTour!.tourTitle!,
-                            date: widget.userModel!.currentTour!.distance!.toString()+" meters",
-                            review: widget.userModel!.currentTour!.description!,
-                            urlimg: widget.userModel!.currentTour!.images[0].replaceAll("localhost", domain),
-                          ),
+
 
                         ],
                       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:guidanclyflutter/models/guide_model.dart';
+import 'package:guidanclyflutter/shared/constants/colors.dart';
 
 class CreateTourCotes extends StatefulWidget {
   const CreateTourCotes({super.key});
@@ -19,17 +21,25 @@ class _CreateTourCoteState extends State<CreateTourCotes> {
     super.initState();
 
     _focusNode3.addListener(() {
-      setState(() {
-        _isFocused3 = _focusNode3.hasFocus;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) { // Check if the widget is still mounted
+          setState(() {
+            _isFocused3 = _focusNode3.hasFocus;
+          });
+        }
       });
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset:
       false, // Prevents resizing when the keyboard appears
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: mainColor, // Set the color you want for the back icon
+        ),
         title: const Text("Creation of tour ",style: TextStyle(color: Colors.blue,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
         backgroundColor: Colors.white,
         actions: [
@@ -38,7 +48,7 @@ class _CreateTourCoteState extends State<CreateTourCotes> {
             child: ElevatedButton(
               onPressed: () async {
                 final arg = (ModalRoute.of(context)?.settings.arguments ?? <String,dynamic> {}) as Map;
-                Navigator.pushNamed(context,'/createTour',arguments: {'price': textEditingPrice.text,'about':arg['about'],'images':arg['images']} );
+                Navigator.pushNamed(context,'/createTour',arguments: {'price': textEditingPrice.text,'about':arg['about'],'images':arg['images'],'guide':arg['guide']} );
               },
 
               child: Text('Next'),

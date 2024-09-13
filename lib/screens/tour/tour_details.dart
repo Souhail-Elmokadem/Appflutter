@@ -465,63 +465,6 @@ class _TourDetailsState extends State<TourDetails> {
               // Swipeable Button
 
 
-              // Align(
-              //   alignment: Alignment.bottomCenter,
-              //   child: Padding(
-              //     padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-              //     child: SizedBox(
-              //       width: MediaQuery.of(context).size.width - 50,
-              //
-              //       child: _isAvailable?SwipeableButtonView(
-              //         buttonText: 'SWIPE TO BOOK',
-              //         isFinished: _isFinished,
-              //         onWaitingProcess: () async {
-              //           await BlocProvider.of<VisitorCubit>(context).book(widget.tourModelReceive.id);
-              //
-              //           // Checking the current state
-              //           var currentState = BlocProvider.of<VisitorCubit>(context).state;
-              //           if (currentState is VisitorStateSuccess) {
-              //             Future.delayed(Duration(seconds: 2), () {
-              //               setState(() {
-              //                 _isFinished = true;
-              //               });
-              //             });
-              //           } else {
-              //             setState(() {
-              //               _isFinished = false;
-              //             });
-              //           }
-              //         },
-              //         onFinish: () async {
-              //           var currentState = BlocProvider.of<VisitorCubit>(context).state;
-              //           if (currentState is VisitorStateSuccess) {
-              //             await Navigator.push(
-              //               context,
-              //               PageTransition(
-              //                 type: PageTransitionType.fade,
-              //                 child:  ScreenThnkReserve(visitorModel: visitorModel!,)
-              //                 ,
-              //               ),
-              //             );
-              //           }
-              //           setState(() {
-              //             _isFinished = false;
-              //           });
-              //         },
-              //         activeColor: mainColor,
-              //         buttonWidget: Icon(Icons.arrow_forward_ios),
-              //       ):Container(
-              //         height: 59,
-              //         alignment: Alignment.center,
-              //
-              //         decoration: BoxDecoration(
-              //             borderRadius: BorderRadius.circular(30),
-              //             color: mainColor
-              //         ),
-              //         child: Text("Already Swiped !" ,style: TextStyle(color: Colors.white,fontFamily: 'sf-ui',fontSize: 16),),),
-              //     ),
-              //   ),
-              // ),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
@@ -529,7 +472,7 @@ class _TourDetailsState extends State<TourDetails> {
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width - 50,
 
-                    child: SwipeableButtonView(
+                    child: _isAvailable?SwipeableButtonView(
                       buttonText: 'SWIPE TO BOOK',
                       isFinished: _isFinished,
                       onWaitingProcess: () async {
@@ -556,7 +499,7 @@ class _TourDetailsState extends State<TourDetails> {
                             context,
                             PageTransition(
                               type: PageTransitionType.fade,
-                              child:  ScreenThnkReserve(visitorModel: BlocProvider.of<VisitorCubit>(context)!.visitorModel!,)
+                              child:  ScreenThnkReserve(visitorModel: visitorModel!,)
                               ,
                             ),
                           );
@@ -567,10 +510,79 @@ class _TourDetailsState extends State<TourDetails> {
                       },
                       activeColor: mainColor,
                       buttonWidget: Icon(Icons.arrow_forward_ios),
+                    ):InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                            type: PageTransitionType.fade,
+                            duration: Duration(milliseconds: 600),
+                            child:  TourReserve(visitorModel: visitorModel!,)
+
+                        ));
+                      },
+                      child: Container(
+                        height: 59,
+                        alignment: Alignment.center,
+
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: mainColor
+                        ),
+                        child: Text("Already Swiped !" ,style: TextStyle(color: Colors.white,fontFamily: 'sf-ui',fontSize: 16),),),
                     ),
                   ),
                 ),
               ),
+              // Align(
+              //   alignment: Alignment.bottomCenter,
+              //   child: Padding(
+              //     padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+              //     child: SizedBox(
+              //       width: MediaQuery.of(context).size.width - 50,
+              //
+              //       child: SwipeableButtonView(
+              //         buttonText: 'SWIPE TO BOOK',
+              //         isFinished: _isFinished,
+              //         onWaitingProcess: () async {
+              //           await BlocProvider.of<VisitorCubit>(context).book(widget.tourModelReceive.id);
+              //
+              //           // Checking the current state
+              //           var currentState = BlocProvider.of<VisitorCubit>(context).state;
+              //           if (currentState is VisitorStateSuccess) {
+              //             Future.delayed(Duration(seconds: 2), () {
+              //               setState(() {
+              //                 _isFinished = true;
+              //               });
+              //             });
+              //           } else {
+              //             setState(() {
+              //               _isFinished = false;
+              //             });
+              //           }
+              //         },
+              //         onFinish: () async {
+              //           var currentState = BlocProvider.of<VisitorCubit>(context).state;
+              //           if (currentState is VisitorStateSuccess) {
+              //             await Navigator.push(
+              //               context,
+              //               PageTransition(
+              //                 type: PageTransitionType.fade,
+              //                 child:  ScreenThnkReserve(visitorModel: BlocProvider.of<VisitorCubit>(context)!.visitorModel!,)
+              //                 ,
+              //               ),
+              //             );
+              //           }
+              //           setState(() {
+              //             _isFinished = false;
+              //           });
+              //         },
+              //         activeColor: mainColor,
+              //         buttonWidget: Icon(Icons.arrow_forward_ios),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         );

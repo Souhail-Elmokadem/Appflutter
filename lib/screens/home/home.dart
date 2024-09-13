@@ -14,6 +14,7 @@ import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
 import 'package:guidanclyflutter/models/visitor_model.dart';
 import 'package:guidanclyflutter/screens/home/home_maps.dart';
+import 'package:guidanclyflutter/screens/home/list_tour.dart';
 import 'package:guidanclyflutter/screens/profile/profile_screen.dart';
 import 'package:guidanclyflutter/screens/tour/tour_details.dart';
 import 'package:guidanclyflutter/screens/widgets/bottom_navigation_bar.dart';
@@ -183,7 +184,9 @@ class _HomeState extends State<Home> {
                                 fontWeight: FontWeight.w400),
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(context, PageTransition(child: ListTour(), type: PageTransitionType.rightToLeftJoined,childCurrent: Home(visitorModel: widget.visitorModel)));
+                            },
                             child: const Text(
                               "View all",
                               style: TextStyle(

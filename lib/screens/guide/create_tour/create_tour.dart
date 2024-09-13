@@ -28,6 +28,7 @@ class CreateTour extends ChangeNotifier {
   final TourService tourService = TourService();
   OSRMService osrmService = OSRMService();
   final String orsApiKey = orsmApiKey; // Replace with your ORS API key
+  bool _allowMarkerAddition = true; // Control when markers are allowed to be added
 
   CreateTour() {
     initializeCurrentLocation();
@@ -39,43 +40,77 @@ class CreateTour extends ChangeNotifier {
     notifyListeners();
   }
 
+  void startNewTour() {
+    markers.clear();
+    clearTourModel();// Clear previous markers
+    // Logic to create new markers
+  }
+  void clearTourModel() {
+    tourModel = TourModel(
+      0,
+      // tourId
+      "",
+      // tourTitle
+      null,
+      // depart (reset to null or empty stop)
+      "",
+      // description
+      0,
+      // price
+      0,
+      // estimatedTime
+      [],
+      // stops (reset to an empty list)
+      0,
+      // distance
+      [], // images (reset to an empty list)
+    );
+  }
   Future<void> addWaypoint(LatLng point, String title) async {
+    if (!_allowMarkerAddition) {
+      return; // Don't add markers if not allowed
+    }
+    print("+++++++++++++++++++++++++++++++++++");
+    print("+++++++++++++++++++++++++++++++++++");
+    print(tourModel.stops);
+
+    print("+++++++++++++++++++++++++++++++++++");
     waypoints.add(point);
+    tourModel.stops?.add(StopModel(name: title, location: LocationModel(point)));
 
-    //tourModel.addstop(title,point.latitude.toString(),point.longitude.toString());
+    // Create marker icon
+    final markerIcon = await createCustomMarker(title, "", null);
 
-
-
-      tourModel.stops?.add(StopModel(name: title,location: LocationModel(point)));
-
-
-    // Create a custom marker with the title
-    final markerIcon = await createCustomMarker(title,"",null);
-
-    // Add the marker to the set of markers
+    // Add marker to the set
     markers.add(
       Marker(
         markerId: MarkerId(point.toString()),
         position: point,
         icon: markerIcon,
-        infoWindow: InfoWindow(
-          title: title,
-        ),
+        infoWindow: InfoWindow(title: title),
       ),
-
     );
-
 
     notifyListeners();
   }
-
   Future<void> clearMarkersAndPolylines() async {
+    print("Clearing markers and polylines");
+
     waypoints.clear();
     markers.clear();
     polylineCoordinates.clear();
     polylines.clear();
+    tourModel.tourTitle = null;
+    tourModel.images!.clear();
+    tourModel.description=null;
+    tourModel.price=null;
+    tourModel.stops!.clear();
     notifyListeners();
   }
+
+
+
+
 
   Future<BitmapDescriptor> createCustomMarker(String title,String url,double? size) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
@@ -146,22 +181,26 @@ class CreateTour extends ChangeNotifier {
 
     return distance;
   }
-  Future<TourModel> saveTour(String tourName, String descriptionarg, double price,List<File> listimage) async {
+  Future<TourModel> saveTour(String tourName, String descriptionarg, double price, List<File> listimage) async {
+    _allowMarkerAddition = false; // Prevent adding markers during saving
+
     if (currentLocation == null || waypoints.isEmpty) {
       print('No current location or waypoints available');
-      return TourModel(0,"",null,"",0,0,[],0,[]);
+      return TourModel(0, "", null, "", 0, 0, [], 0, []);
     }
-      print("===========================================");
-    tourModel.tourTitle= tourName;
-    tourModel.description=descriptionarg;
-    tourModel.depart =  StopModel(name: "departTour", location:  LocationModel(LatLng(markers.first.position.latitude, markers.first.position.longitude)));
-    tourModel.price=price;
-    tourModel.estimatedTime=await getStopsForCalculateDuration(tourModel.stops!);
-    tourModel.distance=await getStopsForCalculateDistance(tourModel.stops!);
-    tourModel.images=listimage;
+
+    print("===========================================");
+    tourModel.tourTitle = tourName;
+    tourModel.description = descriptionarg;
+    tourModel.depart = StopModel(name: "departTour", location: LocationModel(LatLng(markers.first.position.latitude, markers.first.position.longitude)));
+    tourModel.price = price;
+    tourModel.estimatedTime = await getStopsForCalculateDuration(tourModel.stops!);
+    tourModel.distance = await getStopsForCalculateDistance(tourModel.stops!);
+    tourModel.images = listimage;
+
+    _allowMarkerAddition = true; // Re-enable marker addition after saving
     return tourModel;
   }
-
   Set<Marker> getWaypoints() {
     return markers;
   }

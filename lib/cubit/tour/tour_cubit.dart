@@ -51,6 +51,64 @@ class TourCubit extends Cubit<TourState>{
     }
   }
 
+  Future<void> update(TourModel tourmodel) async{
+    try {
+
+      print(tourmodel);
+      print("befaore +++++++++++++++++++++++++++++++++");
+      emit(TourStateLoading());
+
+      var body = json.encode(tourmodel.toJson());
+
+      var response = await client.put(
+        Uri.parse('$apiurl/api/tours/update'),
+        body: body,
+      );
+
+      if (response.statusCode == 201) {
+        emit(TourStateSuccess());
+       print(response.body);
+      } else {
+        print('Failed to update tour: ${response.body}');
+        emit(TourStateFailure());
+
+      }
+    } catch (e) {
+      print('Error updating tour: $e');
+      emit(TourStateFailure());
+
+    }
+  }
+  Future<void> delete(int id) async{
+    try {
+
+      print(id);
+      print("befaore +++++++++++++++++++++++++++++++++");
+      emit(TourStateLoading());
+
+
+
+      var response = await client.delete(
+        Uri.parse('$apiurl/api/tours/delete?id=$id'),
+        // body: {
+        //   "id":id.toString()
+        // },
+      );
+
+      if (response.statusCode == 200) {
+        emit(TourStateSuccess());
+       print(response.body);
+      } else {
+        print('Failed to update tour: ${response.body}');
+        emit(TourStateFailure());
+
+      }
+    } catch (e) {
+      print('Error updating tour: $e');
+      emit(TourStateFailure());
+
+    }
+  }
 
   List<File>? listimages;
   List<TourModelReceive> listTours = [];

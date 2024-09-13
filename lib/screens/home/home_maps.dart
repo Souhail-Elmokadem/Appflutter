@@ -296,9 +296,10 @@ class _HomeMapsState extends State<HomeMaps> {
                   color: Colors.white,
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.menu, color: Colors.black),
+                  padding: EdgeInsets.only(left: 5),
+                  icon: Icon(Icons.arrow_back_ios, color: mainColor,size: 17,),
                   onPressed: () {
-                    Scaffold.of(context).openDrawer();
+                    Navigator.pop(context);
                   },
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
@@ -307,46 +308,46 @@ class _HomeMapsState extends State<HomeMaps> {
               ),
             ),
           ),
+          // Positioned(
+          //   top: 40,
+          //   right: 16,
+          //   child: Builder(
+          //     builder: (context) => Padding(
+          //       padding: const EdgeInsets.all(0),
+          //       child: Container(
+          //         width: 300,
+          //         height: 50,
+          //         decoration: BoxDecoration(
+          //           borderRadius: BorderRadius.circular(50),
+          //           color: Colors.white,
+          //           boxShadow: [
+          //             BoxShadow(
+          //               color: Colors.grey.withOpacity(0.5),
+          //               spreadRadius: 1,
+          //               blurRadius: 7,
+          //               offset: Offset(0, 3),
+          //             ),
+          //           ],
+          //         ),
+          //         child: TextFormField(
+          //           decoration: InputDecoration(
+          //             prefixIcon: Icon(Icons.search, color: Colors.grey),
+          //             suffixIcon: Icon(Icons.directions, color: Colors.grey),
+          //             border: OutlineInputBorder(
+          //               borderSide: BorderSide.none,
+          //               borderRadius: BorderRadius.circular(50),
+          //             ),
+          //             contentPadding: EdgeInsets.symmetric(horizontal: 20),
+          //             hintText: "Search in Guidancly Maps",
+          //             hintStyle: TextStyle(color: Colors.grey),
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           Positioned(
             top: 40,
-            right: 16,
-            child: Builder(
-              builder: (context) => Padding(
-                padding: const EdgeInsets.all(0),
-                child: Container(
-                  width: 300,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 7,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
-                      suffixIcon: Icon(Icons.directions, color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                      hintText: "Search in Guidancly Maps",
-                      hintStyle: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 100,
             right: 16,
             child: Builder(
               builder: (context) => Padding(
@@ -370,7 +371,7 @@ class _HomeMapsState extends State<HomeMaps> {
                     onPressed: () {
                       _handleMoveToCurrentLocation();
                     },
-                    icon: Icon(Icons.near_me_rounded, color: mainColor),
+                    icon: Icon(Icons.near_me_rounded, color: mainColor,size: 18,),
                   ),
                 ),
               ),

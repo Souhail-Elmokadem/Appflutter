@@ -51,6 +51,8 @@ class _GuidanclyState extends State<Guidancly> {
         ChangeNotifierProvider<CreateTour>(
           create: (_) => CreateTour(),
         ),
+        ChangeNotifierProvider(create: (_) => CreateTour()), // Ensure fresh instance
+
       ],
       child: MaterialApp(
         theme: appTheme,
