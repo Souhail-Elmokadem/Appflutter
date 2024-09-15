@@ -214,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ReviewCard(
                             user: widget.userModel,
                             name: widget.userModel!.currentTour!.tourTitle!,
-                            date: widget.userModel!.currentTour!.distance!.toString()+" meters",
+                            date: widget.userModel!.currentTour!.price!.toString(),
                             review: widget.userModel!.currentTour!.description!,
                             urlimg: widget.userModel!.currentTour!.images[0].replaceAll("localhost", domain),
                           ),

@@ -335,7 +335,6 @@ class _TourReserveState extends State<TourReserve> {
                             ),
                           ),
                           SizedBox(height: 20,),
-
                         ],
                       ),
 

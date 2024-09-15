@@ -111,6 +111,7 @@ class TourCubit extends Cubit<TourState>{
   }
 
   List<File>? listimages;
+  int totalItems=0;
   List<TourModelReceive> listTours = [];
   List<TourModelReceive> listToursPopular = [];
   void getImage() async {
@@ -129,28 +130,33 @@ class TourCubit extends Cubit<TourState>{
   }
 
 
-  void getTours() async {
+  void getTours({int page = 0, String search = ""}) async {
     try {
+      if (page == 0) {
+        listTours.clear();
+      }
+
       emit(TourStateLoading());
 
       var response = await client.get(
-        Uri.parse('$apiurl/api/tours/getAllToursPage'),
+        Uri.parse('$apiurl/api/tours/getAllToursPage?page=$page&search=$search'),
       );
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
 
+        print('Tours Data: ${data}'); // Debugging
+
         if (data['items'] != null && data['items'] is List) {
           var toursData = data['items'] as List<dynamic>;
 
+          totalItems = data['totalItems'];
           if (toursData.isNotEmpty) {
-            listTours = toursData.map((tour) => TourModelReceive.fromJson(tour)).toList();
+            listTours.addAll(toursData.map((tour) => TourModelReceive.fromJson(tour)).toList());
             emit(TourStateSuccess());
+            emit(TourStateGotIt(listTours));
           } else {
-            // Handle the case where the list is empty
-            print('No tours found.');
-            listTours = [];
-            emit(TourStateFailure()); // You might want to define a new state for empty results
+            emit(TourStateEndOfPage());
           }
         } else {
           print('Invalid data format: ${data['items']}');
@@ -161,11 +167,14 @@ class TourCubit extends Cubit<TourState>{
         emit(TourStateFailure());
       }
     } catch (e) {
-      print('Error saving tour: $e');
+      print('Error loading tours: $e');
       emit(TourStateFailure());
     }
   }
-  // void getToursPopular() async {
+
+
+
+// void getToursPopular() async {
   //   try {
   //     emit(TourStateLoading());
   //

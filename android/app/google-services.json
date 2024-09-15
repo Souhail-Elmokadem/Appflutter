@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1052371068397",
+    "project_id": "guidancly-message-sync",
+    "storage_bucket": "guidancly-message-sync.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1052371068397:android:6288fb0549c1e4780cf3e4",
+        "android_client_info": {
+          "package_name": "com.example.guidanclyflutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_jCA7IK5jybldbu_w9d-pDkAZyr0CE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
