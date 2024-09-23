@@ -3,7 +3,9 @@ import 'package:geocoding/geocoding.dart' as geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:guidanclyflutter/cubit/intercepteurs/auth_intercepteur.dart';
 import 'package:guidanclyflutter/environnement/environnement.prod.dart';
+import 'package:guidanclyflutter/models/reservation_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
+import 'package:guidanclyflutter/models/visitor_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:http_interceptor/http/intercepted_client.dart';
@@ -105,5 +107,66 @@ class TourService {
     );
     await launchUrl(launchUri);
   }
+
+
+  Future<ReservationModel?> getReservationByGuide()async {
+
+    try{
+      http.Response res = await client.get(Uri.parse("$apiurl/api/guides/getReservationByGuide"));
+      if(res.statusCode == 200){
+        dynamic data = jsonDecode(res.body);
+        ReservationModel reservationModel = ReservationModel.fromJson(data);
+        return reservationModel;
+      }else{
+        return null;
+      }
+    }catch(e){
+      print(e.toString());
+
+
+    }
+
+  }
+  Future<ReservationModel?> getReservationByVisitor()async {
+
+    try{
+
+      http.Response res = await client.get(Uri.parse("$apiurl/api/visitor/getReservationByVisitor"));
+      if(res.statusCode == 200){
+        if (res.body.isNotEmpty) {
+        dynamic data = jsonDecode(res.body);
+        ReservationModel reservationModel = ReservationModel.fromJson(data);
+        return reservationModel;
+        }else{
+          return null;
+        }
+      }else{
+        return null;
+      }
+    }catch(e){
+      print(e.toString());
+
+
+    }
+
+  }
+  Future<VisitorModel?> getVisitor()async {
+    try{
+      http.Response res = await client.get(Uri.parse("$apiurl/api/visitor/visitor"));
+      if(res.statusCode == 200){
+        dynamic data = jsonDecode(res.body);
+        VisitorModel visitorModel = VisitorModel.fromJson(data);
+        return visitorModel;
+      }else{
+        return null;
+      }
+    }catch(e){
+      print(e.toString());
+
+
+    }
+
+  }
+
 
 }

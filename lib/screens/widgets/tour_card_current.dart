@@ -17,7 +17,7 @@ class ReviewCard extends StatelessWidget {
     return GestureDetector(
       onTap: (){
         Navigator.pushAndRemoveUntil(context,
-            PageTransition(child: TourReserve(visitorModel: user),
+            PageTransition(child: TourReserve(visitorModel: user,),
                 type: PageTransitionType.rightToLeftWithFade),
                 (Route<dynamic> route) => false
         );

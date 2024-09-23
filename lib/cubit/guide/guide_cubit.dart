@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:bloc/bloc.dart';
 import 'package:guidanclyflutter/cubit/guide/guide_state.dart';
@@ -38,4 +39,24 @@ class GuideCubit extends Cubit<GuideState>{
 
   }
 
+
+  Future<void> completed(String emailVisitor)async{
+    try{
+      emit(WorkTourLoading());
+      http.Response res = await client.post(Uri.parse("$apiurl/api/guides/GuideCompleted?emailVisitor=$emailVisitor"));
+      if(res.statusCode == 200){
+        print("Tour terminated");
+        emit(WorkTourSuccessful());
+        }
+
+      else{
+        emit(WorkTourFailed());
+      }
+    }catch(e){
+      print(e.toString());
+      emit(WorkTourFailed());
+
+    }
+
+  }
 }

@@ -7,6 +7,7 @@ import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/cubit/visitor/visitor_cubit.dart';
 import 'package:guidanclyflutter/cubit/visitor/visitor_state.dart';
 import 'package:guidanclyflutter/environnement/environnement.prod.dart';
+import 'package:guidanclyflutter/models/reservation_model.dart';
 import 'package:guidanclyflutter/models/stop_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
 import 'package:guidanclyflutter/models/visitor_model.dart';
@@ -47,6 +48,7 @@ class _TourDetailsState extends State<TourDetails> {
   MessageDialogService messageDialogService = MessageDialogService();
   final PageController _controllerpage = PageController();
   VisitorModel? visitorModel;
+  ReservationModel? reservationModel;
   bool _isAvailable=true;
   @override
   void initState() {
@@ -54,7 +56,7 @@ class _TourDetailsState extends State<TourDetails> {
     checkTourIsAvailable();
   }
 
-  void checkTourIsAvailable()async{
+  void checkTourIsAvailable() async {
      visitorModel = await BlocProvider.of<VisitorCubit>(context).checkVisitorTour(widget.tourModelReceive.id);
     if(visitorModel != null){
       if(visitorModel?.currentTour!.id == widget.tourModelReceive.id){
@@ -476,7 +478,7 @@ class _TourDetailsState extends State<TourDetails> {
                       buttonText: 'SWIPE TO BOOK',
                       isFinished: _isFinished,
                       onWaitingProcess: () async {
-                        await BlocProvider.of<VisitorCubit>(context).book(widget.tourModelReceive.id);
+                       reservationModel =  await BlocProvider.of<VisitorCubit>(context).book(widget.tourModelReceive.id);
 
                         // Checking the current state
                         var currentState = BlocProvider.of<VisitorCubit>(context).state;
@@ -499,7 +501,7 @@ class _TourDetailsState extends State<TourDetails> {
                             context,
                             PageTransition(
                               type: PageTransitionType.fade,
-                              child:  ScreenThnkReserve(visitorModel: visitorModel!,)
+                              child:  ScreenThnkReserve(reservationModel: reservationModel!,)
                               ,
                             ),
                           );
@@ -517,7 +519,7 @@ class _TourDetailsState extends State<TourDetails> {
                             PageTransition(
                             type: PageTransitionType.fade,
                             duration: Duration(milliseconds: 600),
-                            child:  TourReserve(visitorModel: visitorModel!,)
+                            child:  TourReserve( visitorModel: visitorModel!,)
 
                         ));
                       },

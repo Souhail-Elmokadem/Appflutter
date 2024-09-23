@@ -103,6 +103,9 @@ class _CreateTourPageState extends State<CreateTourPage> {
           resizeToAvoidBottomInset:
           false, // Prevents resizing when the keyboard appears
           appBar: AppBar(
+            iconTheme: IconThemeData(
+              color: mainColor, // Set the color you want for the back icon
+            ),
             title: const Text("Creation of tour",style: TextStyle(color: Colors.blue,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
             backgroundColor: Colors.white,
             actions: [

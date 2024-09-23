@@ -9,3 +9,10 @@ class GuideStateSuccess extends GuideState{
   GuideStateSuccess(this.tours);
 }
 class GuideStateFailed extends GuideState{}
+class WorkTourLoading extends GuideState{}
+class WorkTourSuccessful extends GuideState{}
+class WorkTourSuccess extends GuideState{
+  TourModelReceive tourModelReceive;
+  WorkTourSuccess(this.tourModelReceive);
+}
+class WorkTourFailed extends GuideState{}

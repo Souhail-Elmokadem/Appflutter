@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,8 +9,10 @@ import 'package:guidanclyflutter/cubit/layout/layout_cubit.dart';
 import 'package:guidanclyflutter/cubit/layout/layout_state.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_cubit.dart';
 import 'package:guidanclyflutter/cubit/tour/tour_state.dart';
+import 'package:guidanclyflutter/cubit/visitor/visitor_cubit.dart';
 import 'package:guidanclyflutter/environnement/environnement.prod.dart';
 import 'package:guidanclyflutter/models/location_model.dart';
+import 'package:guidanclyflutter/models/reservation_model.dart';
 import 'package:guidanclyflutter/models/stop_model.dart';
 import 'package:guidanclyflutter/models/tour_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
@@ -36,7 +40,21 @@ class _HomeState extends State<Home> {
    List<TourModelReceive> itemsPopular =[];
   TourService tourService = TourService();
 
+  ReservationModel? reservationModel;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
 
+    const oneSec = Duration(seconds:3);
+    Timer.periodic(oneSec, (Timer t) => checkReservationExist());
+  }
+
+  void checkReservationExist()async {
+      reservationModel = await BlocProvider.of<VisitorCubit>(context).getReservation(widget.visitorModel!.currentTour!.guide!.email!);
+      print("hiiiiiiii");
+      widget.visitorModel = await tourService.getVisitor();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +158,7 @@ class _HomeState extends State<Home> {
                     if (widget.visitorModel! != null && widget.visitorModel!.currentTour != null && widget.visitorModel!.currentTour!.images.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 25,vertical: 25),
-                        child: ReviewCard(user: widget.visitorModel!, name: widget.visitorModel!.currentTour!.tourTitle!, date: widget.visitorModel!.currentTour!.price!.toString(), review: widget.visitorModel!.currentTour!.description!, urlimg: widget.visitorModel!.currentTour!.images[0]!.replaceAll("localhost", domain)),
+                        child:widget.visitorModel!.currentTour !=null? ReviewCard(user: widget.visitorModel!, name: widget.visitorModel!.currentTour!.tourTitle!, date: widget.visitorModel!.currentTour!.price!.toString(), review: widget.visitorModel!.currentTour!.description!, urlimg: widget.visitorModel!.currentTour!.images[0]!.replaceAll("localhost", domain,),):Container(width: 0,),
                       ),
                     SizedBox(
                       height: 15,

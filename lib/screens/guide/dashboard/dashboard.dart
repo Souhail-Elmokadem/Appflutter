@@ -1,18 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guidanclyflutter/cubit/guide/guide_cubit.dart';
 import 'package:guidanclyflutter/cubit/guide/guide_state.dart';
+import 'package:guidanclyflutter/cubit/tour/test.dart';
 import 'package:guidanclyflutter/environnement/environnement.prod.dart';
 import 'package:guidanclyflutter/models/guide_model.dart';
+import 'package:guidanclyflutter/models/reservation_model.dart';
+import 'package:guidanclyflutter/models/tour_model_receive.dart';
 import 'package:guidanclyflutter/screens/guide/create_tour/create_tour_details.dart';
+import 'package:guidanclyflutter/screens/guide/request/list_request.dart';
+import 'package:guidanclyflutter/screens/guide/request/tour_details_screen.dart';
 import 'package:guidanclyflutter/screens/guide/update_tour/update_tour.dart';
 import 'package:guidanclyflutter/screens/profile/profile_screen_guide.dart';
+import 'package:guidanclyflutter/services/tour_service.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:page_transition/page_transition.dart';
 
 class Dashboard extends StatefulWidget {
-   Dashboard({super.key,this.guideModel});
+  Dashboard({super.key, this.guideModel});
 
   GuideModel? guideModel;
   @override
@@ -22,11 +30,33 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final GlobalKey<ScaffoldState> _key = GlobalKey(); // Create a key
 
+  ReservationModel? reservationModel;
+  Timer? periodicTimer;
+
+  TourService tourService = TourService();
+
+
+
   @override
   void initState() {
     super.initState();
-    // Fetch tours data when initializing the screen
-    context.read<GuideCubit>().getToursByGuide();
+    initTourLoading();
+  }
+  void initTourLoading() async {
+    await context.read<GuideCubit>().getToursByGuide();
+    initTimer();  // Start timer after tours are loaded
+  }
+
+  void initTimer() {
+    const oneSec = Duration(seconds: 3);
+    periodicTimer = Timer.periodic(oneSec, (Timer t) => getWorkTourIfExist());
+  }
+
+
+  Future<void> getWorkTourIfExist() async {
+    ReservationModel? newRes = await tourService.getReservationByGuide();
+      setState(() => reservationModel = newRes);
+
   }
 
   @override
@@ -37,34 +67,68 @@ class _DashboardState extends State<Dashboard> {
       context.read<GuideCubit>().getToursByGuide();
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, PageTransition(child: ListRequest(reservationModel: reservationModel,), type: PageTransitionType.leftToRight));
+        },
+        child: Stack(
+          children: [
+            Icon(
+              Icons.add_alert_outlined,
+              size: 25,
+            ),
+            if(reservationModel != null)
+                 Container(
+              margin: EdgeInsets.only(left: 15),
+              width: 20,
+              height: 20,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                "+1",
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            )
+
+          ],
+        ),
+      ),
       key: _key,
       drawer: Drawer(
         child: Column(
           children: <Widget>[
             InkWell(
-              onTap: (){
+              onTap: () {
                 //Navigator.push(context, PageTransition(child: ProfileScreen(userModel: ,), type: PageTransitionType.fade));
               },
               child: Container(
-                margin: EdgeInsets.fromLTRB(10,35,35,0),
+                margin: EdgeInsets.fromLTRB(10, 35, 35, 0),
                 child: Row(
                   children: [
                     Container(
                       margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
                       child: CircleAvatar(
                         radius: 25,
-                        backgroundImage: NetworkImage(widget.guideModel?.avatar! != null ? widget.guideModel!.avatar!.replaceAll("localhost", domain) : ""),
+                        backgroundImage: NetworkImage(
+                            widget.guideModel?.avatar! != null
+                                ? widget.guideModel!.avatar!
+                                    .replaceAll("localhost", domain)
+                                : ""),
                       ),
                     ),
                     Container(
                       margin: EdgeInsets.fromLTRB(0, 0, 60, 0),
                       child: Text(
                         widget.guideModel!.firstName!,
-                        style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w500),
                       ),
                     ),
                     Icon(Icons.keyboard_arrow_right_sharp)
@@ -80,9 +144,40 @@ class _DashboardState extends State<Dashboard> {
               children: <Widget>[
                 ListTile(
                   leading: Icon(Icons.add_location_alt_outlined),
-                  title: Text('Create Tour',style: TextStyle(fontWeight: FontWeight.w400,fontFamily: 'sf-ui',),),
+                  title: Text(
+                    'Create Tour',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'sf-ui',
+                    ),
+                  ),
                   onTap: () {
-                     Navigator.push(context, PageTransition(child: CreateTourDetails(guideModel: widget.guideModel != null?widget.guideModel:GuideModel("", "", "", "", "", DateTime.now(), ""),), type: PageTransitionType.fade,curve: Curves.easeInOut,duration: Duration(milliseconds: 600)));
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                            child: CreateTourDetails(
+                              guideModel: widget.guideModel != null
+                                  ? widget.guideModel
+                                  : GuideModel(
+                                      "", "", "", "", "", DateTime.now(), ""),
+                            ),
+                            type: PageTransitionType.fade,
+                            curve: Curves.easeInOut,
+                            duration: Duration(milliseconds: 600)));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.timelapse),
+                  title: Text(
+                    'Tour Request',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'sf-ui',
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.push(context, PageTransition(child: ListRequest(reservationModel: reservationModel,), type: PageTransitionType.leftToRight));
+
                   },
                 ),
               ],
@@ -101,7 +196,7 @@ class _DashboardState extends State<Dashboard> {
           children: [
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 35,horizontal: 15),
+              padding: EdgeInsets.symmetric(vertical: 35, horizontal: 15),
               height: 300,
               color: mainColor,
               child: Column(
@@ -111,15 +206,33 @@ class _DashboardState extends State<Dashboard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        onPressed: (){
+                        onPressed: () {
                           _key.currentState!.openDrawer();
                         },
-                      icon:const Icon(Icons.sort,color: Colors.white,size: 40) ,
+                        icon: const Icon(Icons.sort,
+                            color: Colors.white, size: 40),
                       ),
-                      Text("guidancly",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontFamily: 'sf-ui',fontSize: 22),),
+                      Text(
+                        "guidancly",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'sf-ui',
+                            fontSize: 22),
+                      ),
                       InkWell(
-                        onTap: (){
-                          Navigator.push(context, PageTransition(child: ProfileScreenGuide(guideModel: widget.guideModel), type: PageTransitionType.rightToLeftJoined,childCurrent: Dashboard(guideModel: widget.guideModel,), curve: Curves.easeOut,duration: Duration(milliseconds: 400)));
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              PageTransition(
+                                  child: ProfileScreenGuide(
+                                      guideModel: widget.guideModel),
+                                  type: PageTransitionType.rightToLeftJoined,
+                                  childCurrent: Dashboard(
+                                    guideModel: widget.guideModel,
+                                  ),
+                                  curve: Curves.easeOut,
+                                  duration: Duration(milliseconds: 400)));
                         },
                         child: Container(
                           padding: EdgeInsets.all(2),
@@ -128,27 +241,45 @@ class _DashboardState extends State<Dashboard> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: CircleAvatar(
-                            backgroundImage: NetworkImage(widget.guideModel?.avatar! != null ? widget.guideModel!.avatar!.replaceAll("localhost", domain) : ""),
+                            backgroundImage: NetworkImage(
+                                widget.guideModel?.avatar! != null
+                                    ? widget.guideModel!.avatar!
+                                        .replaceAll("localhost", domain)
+                                    : ""),
                           ),
                         ),
                       )
                     ],
                   ),
-                  SizedBox(height: 15,),
+                  SizedBox(
+                    height: 15,
+                  ),
                   Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Text("Hi ${widget.guideModel!.firstName} !",style: const TextStyle(color: Colors.white,fontSize: 30,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),))
-                  ,Padding(
+                      child: Text(
+                        "Hi ${widget.guideModel!.firstName} !",
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 30,
+                            fontFamily: 'sf-ui',
+                            fontWeight: FontWeight.bold),
+                      )),
+                  Padding(
                       padding: EdgeInsets.symmetric(horizontal: 6),
-                      child: Text("Created at: ${_format(widget.guideModel!.createdAt!)}",style: const TextStyle(color: Colors.white54,fontSize: 15,fontFamily: 'sf-ui',fontWeight: FontWeight.w400),))
+                      child: Text(
+                        "Created at: ${_format(widget.guideModel!.createdAt!)}",
+                        style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 15,
+                            fontFamily: 'sf-ui',
+                            fontWeight: FontWeight.w400),
+                      ))
                 ],
               ),
             ),
             BlocConsumer<GuideCubit, GuideState>(
               listener: (context, state) {},
               builder: (context, state) {
-
-
                 if (state is GuideStateSuccess) {
                   return Container(
                     margin: const EdgeInsets.only(top: 200),
@@ -162,67 +293,120 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     height: 600,
                     child: GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 1,
                         childAspectRatio: 1.9,
                         mainAxisSpacing: 25,
                       ),
                       shrinkWrap: true,
 
-                      itemCount: state.tours.length, // Ensure itemCount is not nullable
+                      itemCount: state
+                          .tours.length, // Ensure itemCount is not nullable
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: () {
                             Navigator.push(
                               context,
                               PageTransition(
-                                child: UpdateTour(tourModelReceive: state.tours[index]),
+                                child: UpdateTour(
+                                    tourModelReceive: state.tours[index]),
                                 type: PageTransitionType.rightToLeftWithFade,
                                 curve: Curves.easeOut,
                               ),
                             );
-
                           },
                           child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 25, vertical: 8),
                             decoration: BoxDecoration(
                               color: mainColor,
                               borderRadius: BorderRadius.circular(20),
-                            image: DecorationImage(
-                                fit: BoxFit.cover,
-                                colorFilter: ColorFilter.mode(Colors.orangeAccent.withOpacity(0.5), BlendMode.multiply),
-                                image: NetworkImage(state.tours[index].images[0].replaceAll("localhost", domain))),
-
+                              image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  colorFilter: ColorFilter.mode(
+                                      Colors.orangeAccent.withOpacity(0.5),
+                                      BlendMode.multiply),
+                                  image: NetworkImage(state
+                                      .tours[index].images[0]
+                                      .replaceAll("localhost", domain))),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(20),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Wrap(
                                     children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                        Text(state.tours[index]!.tourTitle!,style: TextStyle(fontSize: 25,color: Colors.white,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
+                                          Text(
+                                            state.tours[index]!.tourTitle!,
+                                            style: TextStyle(
+                                                fontSize: 25,
+                                                color: Colors.white,
+                                                fontFamily: 'sf-ui',
+                                                fontWeight: FontWeight.bold),
+                                          ),
                                           Row(
                                             children: [
-                                            Icon(Icons.star,color: Colors.white,size: 18,),
-                                            Text("4.7",style: TextStyle(fontSize: 13,color: Colors.white,fontFamily: 'sf-ui',fontWeight: FontWeight.bold),),
-                                          ],)
-                                      ],),
-                                      Row(children: [
-                                        Expanded(child: Text(state.tours[index]!.description!,style: TextStyle(fontSize: 15,color: Colors.white,fontFamily: 'sf-ui',fontWeight: FontWeight.w100),)),
-                                      ],)
+                                              Icon(
+                                                Icons.star,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                              Text(
+                                                "4.7",
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.white,
+                                                    fontFamily: 'sf-ui',
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: Text(
+                                            state.tours[index]!.description!,
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                color: Colors.white,
+                                                fontFamily: 'sf-ui',
+                                                fontWeight: FontWeight.w100),
+                                          )),
+                                        ],
+                                      )
                                     ],
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                    Text("click to update",style: TextStyle(fontSize: 13,color: Colors.white,fontFamily: 'sf-ui',fontWeight: FontWeight.bold))
-                                   ,SizedBox(width: 10,),Icon(Icons.east_outlined,color: Colors.white,size: 15,)
-                                    ],)
+                                      Text("click to update",
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.white,
+                                              fontFamily: 'sf-ui',
+                                              fontWeight: FontWeight.bold)),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Icon(
+                                        Icons.east_outlined,
+                                        color: Colors.white,
+                                        size: 15,
+                                      )
+                                    ],
+                                  )
                                 ],
                               ),
                             ),
@@ -241,20 +425,20 @@ class _DashboardState extends State<Dashboard> {
                   );
                 } else {
                   return const Center(
-                    child: Text('Welcome! Please wait while we load your tours.'),
+                    child:
+                        Text('Welcome! Please wait while we load your tours.'),
                   );
                 }
               },
             )
-
           ],
         ),
       ),
-
     );
   }
-  String _format(DateTime date){
-    return date.toString().substring(0,10);
+
+  String _format(DateTime date) {
+    return date.toString().substring(0, 10);
     // return "${date.year}-${date.month}-${date.day}";
   }
 }

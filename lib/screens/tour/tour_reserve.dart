@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:guidanclyflutter/cubit/visitor/visitor_cubit.dart';
 import 'package:guidanclyflutter/environnement/environnement.prod.dart';
+import 'package:guidanclyflutter/models/reservation_model.dart';
 import 'package:guidanclyflutter/models/tour_model_receive.dart';
 import 'package:guidanclyflutter/models/visitor_model.dart';
 import 'package:guidanclyflutter/screens/chat/chat.dart';
 import 'package:guidanclyflutter/screens/guide/create_tour/create_tour.dart';
+import 'package:guidanclyflutter/screens/home/home.dart';
+import 'package:guidanclyflutter/screens/tour/review_after_buying.dart';
 import 'package:guidanclyflutter/screens/tour/tour_details.dart';
 import 'package:guidanclyflutter/services/osrm_service.dart';
 import 'package:guidanclyflutter/services/tour_service.dart';
@@ -18,7 +23,8 @@ import 'package:page_transition/page_transition.dart'; // Import this to access 
 
 class TourReserve extends StatefulWidget {
   final VisitorModel visitorModel;
-  const TourReserve({Key? key, required this.visitorModel}) : super(key: key);
+
+   TourReserve({Key? key, required this.visitorModel}) : super(key: key);
 
   @override
   _TourReserveState createState() => _TourReserveState();
@@ -36,10 +42,17 @@ class _TourReserveState extends State<TourReserve> {
   final List<Marker> _stopMarkers = [];
   String _mapStyle = '';
   TourService tourService = TourService();
+  Timer? _timer;
+
+  ReservationModel? reserv;
+  VisitorModel? visitorModel;
 
   @override
   void initState() {
     super.initState();
+
+    if (!mounted) return;
+
 
     // Listen to location changes
     _location.onLocationChanged.listen((LocationData locationData) {
@@ -53,21 +66,43 @@ class _TourReserveState extends State<TourReserve> {
     if (widget.visitorModel.currentTour != null) {
       _addStopMarkers(widget.visitorModel.currentTour!);
     }
+    const oneSec = Duration(seconds:5);
+    _timer = Timer.periodic(oneSec, (Timer t) => checkReservationExist());  }
+
+  void checkReservationExist() async {
+    if (!mounted) return;
+    visitorModel = await tourService.getVisitor();
+    if (visitorModel!.currentTour == null) {
+      print("Navigating to ReviewAfterBuying");
+      Navigator.pushAndRemoveUntil(
+        context,
+        PageTransition(
+          child: ReviewAfterBuying(),
+          type: PageTransitionType.leftToRightWithFade,
+          curve: Curves.easeOutQuint,
+          duration: Duration(milliseconds: 400),
+        ),
+            (Route<dynamic> route) => false,
+      );
+    }
   }
 
+
   void _updateLocation(LatLng latLng) async {
+    if (!mounted) return;
+
     final customMarker = await createTour.createCustomMarker(
         "Your Location", "assets/img/visitorlocation.png", 200);
-
-    setState(() {
-      _currentLatLng = latLng;
-      _currentLocationMarker = Marker(
-        markerId: MarkerId('current_location'),
-        position: latLng,
-        icon: customMarker,
-      );
-    });
-
+    if (mounted) {
+      setState(() {
+        _currentLatLng = latLng;
+        _currentLocationMarker = Marker(
+          markerId: MarkerId('current_location'),
+          position: latLng,
+          icon: customMarker,
+        );
+      });
+    }
     if (_stopMarkers.isNotEmpty) {
       LatLng destination = _stopMarkers.first
           .position; // Assuming first stop is the destination
@@ -94,6 +129,8 @@ class _TourReserveState extends State<TourReserve> {
   }
 
   double _calculateBearing(LatLng start, LatLng end) {
+
+
     double startLat = start.latitude * (pi / 180);
     double startLng = start.longitude * (pi / 180);
     double endLat = end.latitude * (pi / 180);
@@ -114,6 +151,7 @@ class _TourReserveState extends State<TourReserve> {
 
 
   void _generateTourRoute() async {
+    if (!mounted) return;
     if (_currentLatLng == null || _stopMarkers.isEmpty) return;
 
     LatLng firstStopLatLng = _stopMarkers.first.position;
@@ -127,6 +165,8 @@ class _TourReserveState extends State<TourReserve> {
   }
 
   void _addStopMarkers(TourModelReceive tour) {
+    if (!mounted) return;
+
     for (var stop in tour.stops!) {
       final LatLng stopLatLng = LatLng(
           stop.location!.point!.latitude!, stop.location!.point!.longitude);
@@ -147,6 +187,26 @@ class _TourReserveState extends State<TourReserve> {
     // Load the JSON style from the asset
     _mapStyle = await rootBundle.loadString('assets/map_style.json');
   }
+  @override
+  void dispose() {
+    super.dispose();
+
+    // Cancel the Timer if it's active
+    _timer?.cancel();
+
+
+    // Dispose of the GoogleMapController if it has been completed
+    if (_controller.isCompleted) {
+      _controller.future.then((controller) {
+        controller.dispose();
+      });
+    }
+
+    // Stop listening to location updates if needed
+    _location.onLocationChanged.drain();
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +316,7 @@ class _TourReserveState extends State<TourReserve> {
                                       child: ElevatedButton(
                                         onPressed: () {
                                           // Add your onPressed code here!
-                                          Navigator.push(context, PageTransition(child: Chat(), type: PageTransitionType.bottomToTop,childCurrent: TourReserve(visitorModel: widget.visitorModel),curve: Curves.easeOut,duration: Duration(milliseconds: 500)));
+                                          Navigator.push(context, PageTransition(child: Chat(), type: PageTransitionType.bottomToTop,curve: Curves.easeOut,duration: Duration(milliseconds: 500)));
                                         },
                                         style: ElevatedButton.styleFrom(
                                           foregroundColor: Colors.blueGrey,
@@ -343,64 +403,179 @@ class _TourReserveState extends State<TourReserve> {
                 ),
               ),
             ),
-            Positioned(
-              bottom: 0,
-              left: 20,
-              child: Container(
-                margin: EdgeInsets.only(bottom: 15),
-                child: SizedBox(
-
-                  width: MediaQuery.of(context).size.width-40,
-                  // Make the button take full width
-                  child: ElevatedButton(
-
-                    onPressed: () {
-                      // Add your onPressed code here!
-                      tourService.makePhoneCall(widget.visitorModel.currentTour!.guide!.number!);
-                      //Navigator.push(context, PageTransition(child: TourDetails(tourModelReceive: selectedTour!,), type: PageTransitionType.rightToLeftWithFade));
-
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor:
-                      mainColor, // Button text color
-                      padding: EdgeInsets.symmetric(
-                          vertical: 16), // Button padding
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            20), // Rounded corners
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.call_outlined),
-                        SizedBox(width: 10,),
-                        Text(
-                          'Call Guide',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontFamily: 'sf-ui',// Font size
-                            fontWeight:
-                            FontWeight.w400, // Font weight
-                          ),
-                        ),
-
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Positioned(
+            //   bottom: 0,
+            //   left: 20,
+            //   child: Container(
+            //     margin: EdgeInsets.only(bottom: 15),
+            //     child: SizedBox(
+            //
+            //       width: MediaQuery.of(context).size.width-40,
+            //       // Make the button take full width
+            //       child: Row(
+            //         children: [
+            //           ElevatedButton(
+            //
+            //             onPressed: () {
+            //               // Add your onPressed code here!
+            //               tourService.makePhoneCall(widget.visitorModel.currentTour!.guide!.number!);
+            //               //Navigator.push(context, PageTransition(child: TourDetails(tourModelReceive: selectedTour!,), type: PageTransitionType.rightToLeftWithFade));
+            //
+            //             },
+            //             style: ElevatedButton.styleFrom(
+            //               foregroundColor: Colors.white,
+            //               backgroundColor:
+            //               mainColor, // Button text color
+            //               padding: EdgeInsets.symmetric(
+            //                   vertical: 16,horizontal: 8), // Button padding
+            //               shape: RoundedRectangleBorder(
+            //                 borderRadius: BorderRadius.circular(
+            //                     20), // Rounded corners
+            //               ),
+            //             ),
+            //             child: Row(
+            //               mainAxisAlignment: MainAxisAlignment.center,
+            //               children: [
+            //                 Icon(Icons.cancel_outlined),
+            //
+            //
+            //               ],
+            //             ),
+            //           ),
+            //           ElevatedButton(
+            //
+            //             onPressed: () {
+            //               // Add your onPressed code here!
+            //               tourService.makePhoneCall(widget.visitorModel.currentTour!.guide!.number!);
+            //               //Navigator.push(context, PageTransition(child: TourDetails(tourModelReceive: selectedTour!,), type: PageTransitionType.rightToLeftWithFade));
+            //
+            //             },
+            //             style: ElevatedButton.styleFrom(
+            //               foregroundColor: Colors.white,
+            //               backgroundColor:
+            //               mainColor, // Button text color
+            //               padding: EdgeInsets.symmetric(
+            //                   vertical: 16,horizontal: 60), // Button padding
+            //               shape: RoundedRectangleBorder(
+            //                 borderRadius: BorderRadius.circular(
+            //                     20), // Rounded corners
+            //               ),
+            //             ),
+            //             child: Row(
+            //               mainAxisAlignment: MainAxisAlignment.center,
+            //               children: [
+            //                 Icon(Icons.call_outlined),
+            //                 SizedBox(width: 10,),
+            //                 Text(
+            //                   'Call Guide',
+            //                   style: TextStyle(
+            //                     fontSize: 18,
+            //                     fontFamily: 'sf-ui',// Font size
+            //                     fontWeight:
+            //                     FontWeight.w400, // Font weight
+            //                   ),
+            //                 ),
+            //
+            //               ],
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
 
           ],
         ),
       ),
+      floatingActionButton: Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton.extended(
+              onPressed: () {
+
+                tourService.makePhoneCall("0${widget.visitorModel.currentTour!.guide!.number!}");
+              },
+              label: Text('Call Guide'),
+              icon: Icon(Icons.call),
+              extendedPadding: EdgeInsets.symmetric(horizontal: 60),
+              backgroundColor: mainColor,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20,vertical: 50),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: FloatingActionButton.extended(
+                  onPressed: () {
+                    _showConfirmationDialog(
+                      context,
+                      'Cancel Tour',
+                      'Are you sure you want to cancel the tour?',Colors.redAccent,
+                          () async {
+
+                            if(widget.visitorModel?.currentTour! != null
+                             && widget.visitorModel.currentTour?.guide! != null && widget.visitorModel.currentTour?.guide?.email! != null ){
+                              BlocProvider.of<VisitorCubit>(context).CancelTour(widget.visitorModel.currentTour!.guide!.email!);
+                            }
+                            Navigator.of(context).pop(); // Close the dialog
+
+                            VisitorModel? v = await tourService.getVisitor();
+
+                        // Logic to cancel the tour
+                        print('Tour Cancelled!');
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home(visitorModel: v),));
+                      },
+                    );                  },
+                  backgroundColor: Colors.redAccent.withOpacity(0.8),
+                  extendedPadding: EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                  foregroundColor: Colors.white,
+            
+                  label: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Icon(Icons.arrow_back_ios),
+                  ),
+            
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+
     );
   }
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,
+  );
+}
+void _showConfirmationDialog(BuildContext context, String title, String message,Color color, VoidCallback onConfirm) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+          ),
+          ElevatedButton(
+            style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(Colors.white),backgroundColor:WidgetStatePropertyAll(color) ),
+            child: Text('Confirm'),
+            onPressed: onConfirm, // Call the onConfirm callback
+          ),
+        ],
+      );
+    },
   );
 }

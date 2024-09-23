@@ -2,16 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:guidanclyflutter/models/reservation_model.dart';
 import 'package:guidanclyflutter/models/visitor_model.dart';
 import 'package:guidanclyflutter/screens/tour/tour_reserve.dart';
 import 'package:guidanclyflutter/shared/constants/colors.dart';
 import 'package:page_transition/page_transition.dart';
 
 class ScreenThnkReserve extends StatefulWidget {
-  final VisitorModel visitorModel;
+  final ReservationModel reservationModel;
 
 
-  const ScreenThnkReserve({super.key, required this.visitorModel});
+  const ScreenThnkReserve({super.key, required this.reservationModel});
 
 
   @override
@@ -28,18 +29,18 @@ class _ScreenThnkReserveState extends State<ScreenThnkReserve> {
   @override
   void initState() {
 
-    tourReservePage = TourReserve(visitorModel: widget.visitorModel);
+    tourReservePage = TourReserve(visitorModel: widget.reservationModel!.visitor!,);
 
     // TODO: implement initState
     super.initState();
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
           context,
           PageTransition(
               child: tourReservePage, //Changed
               type: PageTransitionType.fade,
               curve: Curves.bounceIn,
-              duration: const Duration(milliseconds: 1000)));
+              duration: const Duration(milliseconds: 1000)), (Route<dynamic> route) => false);
     });
   }
   @override

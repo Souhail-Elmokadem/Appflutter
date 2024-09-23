@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:guidanclyflutter/cubit/intercepteurs/auth_intercepteur.dart';
 import 'package:guidanclyflutter/cubit/visitor/visitor_state.dart';
 import 'package:guidanclyflutter/environnement/environnement.prod.dart';
+import 'package:guidanclyflutter/models/reservation_model.dart';
 import 'package:guidanclyflutter/models/visitor_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_interceptor/http/intercepted_client.dart';
@@ -78,8 +79,9 @@ class VisitorCubit extends Cubit<VisitorState> {
     }
   }
 
+  ReservationModel? reservationModel;
   // Method to book a tour
-  Future<VisitorModel?> book(int tourId) async {
+  Future<ReservationModel?> book(int tourId) async {
     logger.d("Booking tour with ID: $tourId");
 
     try {
@@ -93,8 +95,9 @@ class VisitorCubit extends Cubit<VisitorState> {
 
       if (response.statusCode == 200) {
         emit(VisitorStateSuccess());
-        visitorModel = VisitorModel.fromJson(jsonDecode(response.body));
-        return VisitorModel.fromJson(jsonDecode(response.body));
+        reservationModel = ReservationModel.fromJson(jsonDecode(response.body));
+
+        return ReservationModel.fromJson(jsonDecode(response.body));
       } else {
         logger.e('Failed to book tour: ${response.body}');
         emit(VisitorStateFailure());
@@ -113,6 +116,63 @@ class VisitorCubit extends Cubit<VisitorState> {
     logger.d("Checking visitor tour with ID: $tourId");
     return _postRequest('/api/visitor/checkVisitorTour?id=$tourId');
   }
+
+
+  Future<ReservationModel?> getReservation(String guideEmail)async{
+    logger.d("Booking tour with ID: $guideEmail");
+
+    try {
+      emit(VisitorStateLoading());
+      var response = await client.get(
+        Uri.parse('$apiurl/api/reservation/getReservation?id=$guideEmail'),
+      );
+
+      logger.d("Response status: ${response.statusCode}");
+      logger.d("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        emit(VisitorStateSuccess());
+        reservationModel = ReservationModel.fromJson(jsonDecode(response.body));
+
+        return ReservationModel.fromJson(jsonDecode(response.body));
+      } else {
+        logger.e('Failed to book tour: ${response.body}');
+        emit(VisitorStateFailure());
+        return null;
+      }
+    } catch (e) {
+      logger.e('Error booking tour: $e');
+      emit(VisitorStateFailure());
+      return null;
+    }
+  }
+  Future<void> CancelTour(String guideEmail)async{
+
+
+    try {
+      emit(VisitorStateLoading());
+      var response = await client.post(
+        Uri.parse('$apiurl/api/guides/VisitorCancel?guideEmail=$guideEmail'),
+      );
+
+      logger.d("Response status: ${response.statusCode}");
+      logger.d("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        emit(VisitorStateSuccess());
+
+      } else {
+        logger.e('Failed to book tour: ${response.body}');
+        emit(VisitorStateFailure());
+
+      }
+    } catch (e) {
+      logger.e('Error booking tour: $e');
+      emit(VisitorStateFailure());
+
+    }
+  }
+
 
   @override
   Future<void> close() {
